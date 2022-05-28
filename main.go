@@ -26,6 +26,7 @@ func main() {
 	app.Get("/prices", func(c *fiber.Ctx) error {
 		return c.JSON(prices)
 	})
+	//
 	
 	log.Fatal(app.Listen(fmt.Sprintf(":%d", *serverPort)))
 }
