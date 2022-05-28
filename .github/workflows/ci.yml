@@ -63,14 +63,14 @@ jobs:
         run: echo "BRANCH_NAME=$(echo ${GITHUB_HEAD_REF} | tr / -)" >> $GITHUB_ENV
 
       - name: Set image
-        working-directory: ./kubernetes/server
+        working-directory: ./kubernetes
         run: |
           kustomize edit set image replaceme=${{ secrets.DOCKER_REPO }}/banano-utils:${{ env.BRANCH_NAME }}-${{ env.GITHUB_RUN_ID }}
-          kustomize build . > go-deployment-k.yaml
+          kustomize build . > banano-utils-k.yaml
 
       - name: Deploy image to k8s cluster
         uses: bbedward/kubectl@master
         env:
           KUBE_CONFIG_DATA: ${{ secrets.KUBE_CONFIG_DATA }}
         with:
-          args: apply -f ./kubernetes/server/go-deployment-k.yaml
+          args: apply -f ./kubernetes/banano-utils-k.yaml
