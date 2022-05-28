@@ -1,4 +1,4 @@
-FROM golang:1.18.2-alpine as builder
+FROM golang:1.18.2-alpine AS builder
 
 WORKDIR /root
 
@@ -6,8 +6,7 @@ WORKDIR /root
 ADD . .
 # Dependencies and build
 # Install dependencies, go, and cleanup
-RUN apt-get update && apt-get install -y \
-    gcc pkg-config \
+RUN gcc pkg-config \
     && go get \
     && go build -o banano-utils \
     && rm -rf /var/lib/apt/lists/*
