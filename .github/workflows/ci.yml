@@ -32,13 +32,13 @@ jobs:
 
       - name: Build and tag
         if: success()
-        run: docker build -t ${{ secrets.DOCKER_REPO }}/go-monkey:${{ env.BRANCH_NAME }}-${{ env.GITHUB_RUN_ID }} server
+        run: docker build -t ${{ secrets.DOCKER_REPO }}/banano-utils:${{ env.BRANCH_NAME }}-${{ env.GITHUB_RUN_ID }} server
 
       - name: Push image
         if: success()
         uses: actions-hub/docker@master
         with:
-          args: push ${{ secrets.DOCKER_REPO }}/go-monkey:${{ env.BRANCH_NAME }}-${{ env.GITHUB_RUN_ID }}
+          args: push ${{ secrets.DOCKER_REPO }}/banano-utils:${{ env.BRANCH_NAME }}-${{ env.GITHUB_RUN_ID }}
 
   deploy_go:
     name: Deploy GO app
@@ -65,7 +65,7 @@ jobs:
       - name: Set image
         working-directory: ./kubernetes/server
         run: |
-          kustomize edit set image replaceme=${{ secrets.DOCKER_REPO }}/go-monkey:${{ env.BRANCH_NAME }}-${{ env.GITHUB_RUN_ID }}
+          kustomize edit set image replaceme=${{ secrets.DOCKER_REPO }}/banano-utils:${{ env.BRANCH_NAME }}-${{ env.GITHUB_RUN_ID }}
           kustomize build . > go-deployment-k.yaml
 
       - name: Deploy image to k8s cluster
