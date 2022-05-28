@@ -6,8 +6,7 @@ WORKDIR /root
 ADD . .
 # Dependencies and build
 # Install dependencies, go, and cleanup
-RUN gcc pkg-config \
-    && go get \
+RUN go get \
     && go build -o banano-utils \
     && rm -rf /var/lib/apt/lists/*
 
