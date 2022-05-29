@@ -65,7 +65,7 @@ jobs:
       - name: Set image
         working-directory: ./kubernetes
         run: |
-          kustomize edit set image replaceme=${{ secrets.DOCKER_REPO }}/banano-utils:${{ env.BRANCH_NAME }}-${{ env.GITHUB_RUN_ID }}
+          kustomize edit set image replaceme=${{ secrets.DOCKER_REPO }}/go-banano-utils:${{ env.BRANCH_NAME }}-${{ env.GITHUB_RUN_ID }}
           kustomize build . > go-banano-utils-k.yaml
 
       - name: Deploy image to k8s cluster
