@@ -18,7 +18,4 @@ WORKDIR /app
 
 COPY --from=build /go/src/banano-utils/app .
 
-# Exposes port 3000 because our program listens on that port
-EXPOSE 3000
-
 CMD ["./app"]
