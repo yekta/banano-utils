@@ -36,7 +36,6 @@ func main() {
 func GetAndSetPrices() {
 	res := GetPrices();
 	prices = res;
-	//
 }
 
 func GetPrices() structs.SPrices {
