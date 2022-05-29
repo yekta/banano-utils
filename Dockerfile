@@ -7,8 +7,7 @@ ADD . .
 # Dependencies and build
 # Install dependencies, go, and cleanup
 RUN go get \
-    && go build -o banano-utils \
-    && rm -rf /var/lib/apt/lists/*
+    && go build -o banano-utils
 
 # run main.go
-CMD ["./banano-utils", "-host=0.0.0.0", "-port=3000", "-logtostderr"]
+CMD ["./banano-utils"]
