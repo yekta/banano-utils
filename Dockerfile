@@ -2,9 +2,9 @@ FROM golang:1.18.2-alpine
 
 RUN mkdir /app
 
-WORKDIR /app
-
 COPY . /app
+
+WORKDIR /app
 
 RUN go get && go build -o banano-utils .
 
