@@ -6,6 +6,7 @@ import (
 	"fmt"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/yekta/banano-price-service/sources"
 	"github.com/yekta/banano-price-service/structs"
 	"github.com/robfig/cron/v3"
@@ -17,6 +18,8 @@ func main() {
 	serverPort := flag.Int("port", 3000, "Port to listen on")
 
 	app := fiber.New()
+	cors := cors.New()
+	app.Use(cors)
 
 	GetAndSetPrices()
 	cron := cron.New()
