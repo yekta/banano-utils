@@ -26,8 +26,7 @@ spec:
             limits:
               cpu: 400m
               memory: 200Mi
-          args:
-            ["./banano-utils", "-host=0.0.0.0", "-port=3000", "-logtostderr"]
+          args: ["./app"]
           ports:
             - containerPort: 3000
           imagePullPolicy: "Always"
