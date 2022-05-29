@@ -1,22 +1,22 @@
 kind: Deployment
 apiVersion: apps/v1
 metadata:
-  name: banano-utils-deployment
+  name: go-banano-utils-deployment
   namespace: banano-utils
   labels:
-    app: banano-utils
+    app: go-banano-utils
 spec:
   replicas: 2
   selector:
     matchLabels:
-      app: banano-utils
+      app: go-banano-utils
   template:
     metadata:
       labels:
-        app: banano-utils
+        app: go-banano-utils
     spec:
       containers:
-        - name: banano-utils
+        - name: go-banano-utils
           image: replaceme
           command: ["/bin/bash", "-c"]
           resources:

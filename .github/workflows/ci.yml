@@ -32,13 +32,13 @@ jobs:
 
       - name: Build and tag
         if: success()
-        run: docker build -t ${{ secrets.DOCKER_REPO }}/banano-utils:${{ env.BRANCH_NAME }}-${{ env.GITHUB_RUN_ID }} .
+        run: docker build -t ${{ secrets.DOCKER_REPO }}/go-banano-utils:${{ env.BRANCH_NAME }}-${{ env.GITHUB_RUN_ID }} .
 
       - name: Push image
         if: success()
         uses: actions-hub/docker@master
         with:
-          args: push ${{ secrets.DOCKER_REPO }}/banano-utils:${{ env.BRANCH_NAME }}-${{ env.GITHUB_RUN_ID }}
+          args: push ${{ secrets.DOCKER_REPO }}/go-banano-utils:${{ env.BRANCH_NAME }}-${{ env.GITHUB_RUN_ID }}
 
   deploy_go:
     name: Deploy GO app
@@ -66,11 +66,11 @@ jobs:
         working-directory: ./kubernetes
         run: |
           kustomize edit set image replaceme=${{ secrets.DOCKER_REPO }}/banano-utils:${{ env.BRANCH_NAME }}-${{ env.GITHUB_RUN_ID }}
-          kustomize build . > banano-utils-k.yaml
+          kustomize build . > go-banano-utils-k.yaml
 
       - name: Deploy image to k8s cluster
         uses: bbedward/kubectl@master
         env:
           KUBE_CONFIG_DATA: ${{ secrets.KUBE_CONFIG_DATA }}
         with:
-          args: apply -f ./kubernetes/banano-utils-k.yaml
+          args: apply -f ./kubernetes/go-banano-utils-k.yaml

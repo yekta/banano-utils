@@ -1,11 +1,11 @@
 kind: Service
 apiVersion: v1
 metadata:
-  name: banano-utils-service
+  name: go-banano-utils-service
   namespace: banano-utils
 spec:
   selector:
-    app: banano-utils
+    app: go-banano-utils
   type: ClusterIP
   ports:
     - port: 3000
