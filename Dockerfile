@@ -1,13 +1,11 @@
-FROM golang:1.18.2-alpine AS builder
+FROM golang:1.18.2-alpine
 
-WORKDIR /root
+RUN mkdir /app
 
-# add source code
-ADD . .
-# Dependencies and build
-# Install dependencies, go, and cleanup
-RUN go get \
-    && go build -o banano-utils
+WORKDIR /app
 
-# run main.go
-CMD ["./banano-utils"]
+COPY . /app
+
+RUN go get && go build -o banano-utils .
+
+CMD ["/app/banano-utils"]
