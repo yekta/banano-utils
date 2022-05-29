@@ -14,7 +14,7 @@ import (
 var prices structs.SPrices;
 
 func main() {
-	serverPort := flag.Int("port", 8080, "Port to listen on")
+	serverPort := flag.Int("port", 3000, "Port to listen on")
 
 	app := fiber.New()
 
