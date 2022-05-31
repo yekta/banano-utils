@@ -39,13 +39,24 @@ func GetAndSetPrices() {
 }
 
 func GetPrices() structs.SPrices {
-	log.Println("Getting prices...")
-	coinGecko := sources.GetCoinGecko();
-	coinex := sources.GetCoinex();
-	res := structs.SPrices {
-		Main: coinex,
-		Coinex: coinex,
-		CoinGecko: coinGecko,
-	}
+	log.Println("\n\nGetting prices...")
+
+	var res structs.SPrices;
+
+	c1 := make(chan structs.SPriceSet);
+	c2 := make(chan structs.SPriceSet);
+
+	go func(){
+		defer close(c1)
+		c1 <- sources.GetCoinGecko();
+	}();
+	go func(){
+		defer close(c2)
+		c2 <- sources.GetCoinex();
+	}();
+
+	res.CoinGecko = <- c1;
+	res.Coinex = <- c2;
+	res.Main = res.Coinex;
 	return res;
 }

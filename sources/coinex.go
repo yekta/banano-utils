@@ -38,6 +38,8 @@ func GetCoinex() structs.SPriceSet {
 		coinexBANBTC = s
 	}
 
+	log.Println("Coinex done")
+	
 	return structs.SPriceSet{
 		USD: coinexBANUSDT,
 		BTC: coinexBANBTC,
