@@ -48,6 +48,7 @@ func main() {
 				LastUpdateTimestamp: post.LastUpdateTimestamp,
 				Slug: post.Slug,
 				Tags: post.Tags,
+				Image: post.Image,
 			});
 		}
 		return c.JSON(shallowPosts)

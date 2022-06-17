@@ -8,6 +8,7 @@ type MediumPosts struct {
 type MediumPost struct {
 	Title string `json:"title"`
 	Description string `json:"description"`
+	Image string `json:"image"`
 	Content string `json:"content"`
 	Tags []string `json:"tags"`
 	PublishTimestamp int64 `json:"publishTimestamp"`

@@ -7,8 +7,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/yekta/banano-price-service/medium-posts/structs"
 	"github.com/PuerkitoBio/goquery"
+	"github.com/yekta/banano-price-service/medium-posts/structs"
 )
 
 func GetMediumPosts() mediumPostsStructs.MediumPosts {
@@ -47,13 +47,16 @@ func GetMediumPosts() mediumPostsStructs.MediumPosts {
 		doc.Find("script").Each(func(i int, el *goquery.Selection) {
 				el.Remove()
 		})
+		
 		text := doc.Text()
 		description := text[0:200]
-
+		image := doc.Find("img").AttrOr("src", "")
+		
 		mediumPosts.Posts = append(mediumPosts.Posts, mediumPostsStructs.MediumPost{
 			Title: post.Title,
 			Content: post.ContentEncoded,
 			Description: description,
+			Image: image,
 			Tags: post.Tags,
 			PublishTimestamp: tPublish.UnixMilli(),
 			LastUpdateTimestamp: tUpdate.UnixMilli(),
