@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"flag"
 	"fmt"
 	"log"
@@ -29,6 +30,32 @@ func main() {
 
 	app.Get("/prices", func(c *fiber.Ctx) error {
 		return c.JSON(prices)
+	})
+
+	app.Post("/ghost", func(c *fiber.Ctx) error {
+		payload := struct {
+			Post struct {
+				Current struct {
+					Title         string `json:"title"`
+					Html          string `json:"html"`
+					FeatureImage  string `json:"feature_image"`
+					CreatedAt     string `json:"created_at"`
+					PublishedAt   string `json:"published_at"`
+					Excerpt       string `json:"excerpt"`
+					CustomExcerpt string `json:"custom_excerpt"`
+					Slug          string `json:"slug"`
+					Id            string `json:"id"`
+				} `json:"current"`
+			} `json:"post"`
+		}{}
+
+		if err := c.BodyParser(&payload); err != nil {
+			return err
+		}
+
+		PrettyPrint(payload)
+
+		return c.JSON(payload)
 	})
 
 	log.Fatal(app.Listen(fmt.Sprintf(":%d", *serverPort)))
@@ -61,4 +88,12 @@ func GetPrices() priceStructs.SPrices {
 	res.Coinex = <-c2
 	res.Main = res.Coinex
 	return res
+}
+
+func PrettyPrint(v interface{}) (err error) {
+	b, err := json.MarshalIndent(v, "", "  ")
+	if err == nil {
+		fmt.Println(string(b))
+	}
+	return
 }
