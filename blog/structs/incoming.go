@@ -1,4 +1,4 @@
-package ghostStructs
+package blogStructs
 
 type SGhostPostWebhook struct {
 	Post struct {

@@ -9,9 +9,9 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/robfig/cron/v3"
-	"github.com/yekta/banano-price-service/ghost/structs"
-	"github.com/yekta/banano-price-service/prices/sources"
-	"github.com/yekta/banano-price-service/prices/structs"
+	/* 	blog "github.com/yekta/banano-price-service/blog" */
+	priceSources "github.com/yekta/banano-price-service/prices/sources"
+	priceStructs "github.com/yekta/banano-price-service/prices/structs"
 )
 
 var prices priceStructs.SPrices
@@ -33,17 +33,7 @@ func main() {
 		return c.JSON(prices)
 	})
 
-	app.Post("/ghost", func(c *fiber.Ctx) error {
-		var payload ghostStructs.SGhostPostWebhook
-		if err := c.BodyParser(&payload); err != nil {
-			return err
-		}
-
-		post := payload.Post
-		PrettyPrint(post)
-
-		return c.JSON(post)
-	})
+	/* 	app.Post("/blog", blog.BlogHandler) */
 
 	log.Fatal(app.Listen(fmt.Sprintf(":%d", *serverPort)))
 }
