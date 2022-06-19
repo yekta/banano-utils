@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"strings"
 
 	"github.com/gofiber/fiber/v2"
 	blogStructs "github.com/yekta/banano-price-service/blog/structs"
@@ -25,7 +26,7 @@ func BlogHandler(c *fiber.Ctx, MEDIUM_SECRET string, MEDIUM_USER_ID string) erro
 	mediumPost := blogStructs.SMediumPost{
 		Title:         post.Title,
 		ContentFormat: "html",
-		Content:       "<h1>" + post.Title + "</h1>" + post.Html,
+		Content:       GhostToMediumHtmlConverter(post.Html, post.Title),
 		PublishStatus: "draft",
 		CanonicalUrl:  "https://banano.cc/blog/" + post.Slug,
 	}
@@ -53,4 +54,10 @@ func BlogHandler(c *fiber.Ctx, MEDIUM_SECRET string, MEDIUM_USER_ID string) erro
 		},
 	}
 	return c.JSON(r)
+}
+
+func GhostToMediumHtmlConverter(html string, title string) string {
+	modifiedHtml := strings.ReplaceAll(html, "<h2>", "<h1>")
+	modifiedHtml = strings.ReplaceAll(html, "<h3>", "<h2>")
+	return "<h1>" + title + "</h1>" + modifiedHtml
 }
