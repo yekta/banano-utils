@@ -9,7 +9,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/robfig/cron/v3"
-	/* 	blog "github.com/yekta/banano-price-service/blog" */
+	blog "github.com/yekta/banano-price-service/blog"
 	priceSources "github.com/yekta/banano-price-service/prices/sources"
 	priceStructs "github.com/yekta/banano-price-service/prices/structs"
 )
@@ -33,7 +33,7 @@ func main() {
 		return c.JSON(prices)
 	})
 
-	/* 	app.Post("/blog", blog.BlogHandler) */
+	app.Post("/blog", blog.BlogHandler)
 
 	log.Fatal(app.Listen(fmt.Sprintf(":%d", *serverPort)))
 }
