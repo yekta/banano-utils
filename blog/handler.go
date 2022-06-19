@@ -6,14 +6,13 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"strings"
 
 	"github.com/gofiber/fiber/v2"
 	blogStructs "github.com/yekta/banano-price-service/blog/structs"
 )
 
 func BlogHandler(c *fiber.Ctx, MEDIUM_SECRET string, MEDIUM_USER_ID string) error {
-	fmt.Println("\nBlogHandler triggered...")
+	log.Println("BlogHandler triggered...")
 
 	var payload blogStructs.SGhostPostWebhook
 	if err := c.BodyParser(&payload); err != nil {
@@ -41,7 +40,6 @@ func BlogHandler(c *fiber.Ctx, MEDIUM_SECRET string, MEDIUM_USER_ID string) erro
 	}
 	req.Header.Add("Authorization", "Bearer "+MEDIUM_SECRET)
 	req.Header.Add("Content-Type", "application/json")
-	fmt.Println(req)
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
 		return fmt.Errorf("Got error %s", err.Error())
@@ -53,13 +51,11 @@ func BlogHandler(c *fiber.Ctx, MEDIUM_SECRET string, MEDIUM_USER_ID string) erro
 			Title: post.Title,
 		},
 	}
+	log.Printf(`Submitted the post to Medium with the title "%s"...`, post.Title)
 	return c.JSON(r)
 }
 
 func GhostToMediumHtmlConverter(html string, title string) string {
-	modifiedHtml := strings.ReplaceAll(html, "<h2", "<h1")
-	modifiedHtml = strings.ReplaceAll(html, "</h2", "</h1")
-	modifiedHtml = strings.ReplaceAll(html, "<h3", "<h2")
-	modifiedHtml = strings.ReplaceAll(html, "</h3", "</h2")
-	return "<h1>" + title + "</h1>" + modifiedHtml
+	resHtml := "<h1>" + title + "</h1>" + html
+	return resHtml
 }
