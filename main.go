@@ -9,6 +9,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/robfig/cron/v3"
+	"github.com/yekta/banano-price-service/ghost/structs"
 	"github.com/yekta/banano-price-service/prices/sources"
 	"github.com/yekta/banano-price-service/prices/structs"
 )
@@ -33,29 +34,15 @@ func main() {
 	})
 
 	app.Post("/ghost", func(c *fiber.Ctx) error {
-		payload := struct {
-			Post struct {
-				Current struct {
-					Title         string `json:"title"`
-					Html          string `json:"html"`
-					FeatureImage  string `json:"feature_image"`
-					CreatedAt     string `json:"created_at"`
-					PublishedAt   string `json:"published_at"`
-					Excerpt       string `json:"excerpt"`
-					CustomExcerpt string `json:"custom_excerpt"`
-					Slug          string `json:"slug"`
-					Id            string `json:"id"`
-				} `json:"current"`
-			} `json:"post"`
-		}{}
-
+		var payload ghostStructs.SGhostPostWebhook
 		if err := c.BodyParser(&payload); err != nil {
 			return err
 		}
 
-		PrettyPrint(payload)
+		post := payload.Post
+		PrettyPrint(post)
 
-		return c.JSON(payload)
+		return c.JSON(post)
 	})
 
 	log.Fatal(app.Listen(fmt.Sprintf(":%d", *serverPort)))
