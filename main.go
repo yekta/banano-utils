@@ -5,9 +5,11 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"os"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
+	"github.com/joho/godotenv"
 	"github.com/robfig/cron/v3"
 	blog "github.com/yekta/banano-price-service/blog"
 	priceSources "github.com/yekta/banano-price-service/prices/sources"
@@ -17,6 +19,9 @@ import (
 var prices priceStructs.SPrices
 
 func main() {
+	MEDIUM_SECRET := GetEnv("MEDIUM_SECRET")
+	MEDIUM_USER_ID := GetEnv("MEDIUM_USER_ID")
+
 	serverPort := flag.Int("port", 3000, "Port to listen on")
 
 	app := fiber.New()
@@ -33,7 +38,9 @@ func main() {
 		return c.JSON(prices)
 	})
 
-	app.Post("/blog", blog.BlogHandler)
+	app.Post("/blog", func(c *fiber.Ctx) error {
+		return blog.BlogHandler(c, MEDIUM_SECRET, MEDIUM_USER_ID)
+	})
 
 	log.Fatal(app.Listen(fmt.Sprintf(":%d", *serverPort)))
 }
@@ -73,4 +80,12 @@ func PrettyPrint(v interface{}) (err error) {
 		fmt.Println(string(b))
 	}
 	return
+}
+
+func GetEnv(key string) string {
+	err := godotenv.Load(".env")
+	if err != nil {
+		log.Println("\nNo .env file, will try to use env variables...")
+	}
+	return os.Getenv(key)
 }

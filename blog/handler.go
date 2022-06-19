@@ -6,17 +6,13 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"os"
 
 	"github.com/gofiber/fiber/v2"
-	"github.com/joho/godotenv"
 	blogStructs "github.com/yekta/banano-price-service/blog/structs"
 )
 
-func BlogHandler(c *fiber.Ctx) error {
+func BlogHandler(c *fiber.Ctx, MEDIUM_SECRET string, MEDIUM_USER_ID string) error {
 	fmt.Println("\nBlogHandler triggered...")
-	MEDIUM_SECRET := GetEnv("MEDIUM_SECRET")
-	MEDIUM_USER_ID := GetEnv("MEDIUM_USER_ID")
 
 	var payload blogStructs.SGhostPostWebhook
 	if err := c.BodyParser(&payload); err != nil {
@@ -57,12 +53,4 @@ func BlogHandler(c *fiber.Ctx) error {
 		},
 	}
 	return c.JSON(r)
-}
-
-func GetEnv(key string) string {
-	err := godotenv.Load(".env")
-	if err != nil {
-		log.Println("Error loading .env file")
-	}
-	return os.Getenv(key)
 }
