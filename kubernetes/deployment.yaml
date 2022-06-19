@@ -28,16 +28,5 @@ spec:
           ports:
             - containerPort: 3000
           imagePullPolicy: 'Always'
-          env:
-            - name: MEDIUM_SECRET
-              valueFrom:
-                secretKeyRef:
-                  name: util-secrets
-                  key: MEDIUM_SECRET
-            - name: MEDIUM_USER_ID
-              valueFrom:
-                secretKeyRef:
-                  name: util-secrets
-                  key: MEDIUM_USER_ID
       imagePullSecrets:
         - name: regcred
