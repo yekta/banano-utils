@@ -14,6 +14,7 @@ import (
 )
 
 func BlogHandler(c *fiber.Ctx) error {
+	fmt.Println("\nBlogHandler triggered")
 	MEDIUM_SECRET := GetEnv("MEDIUM_SECRET")
 	MEDIUM_USER_ID := GetEnv("MEDIUM_USER_ID")
 
