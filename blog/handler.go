@@ -57,7 +57,9 @@ func BlogHandler(c *fiber.Ctx, MEDIUM_SECRET string, MEDIUM_USER_ID string) erro
 }
 
 func GhostToMediumHtmlConverter(html string, title string) string {
-	modifiedHtml := strings.ReplaceAll(html, "<h2>", "<h1>")
-	modifiedHtml = strings.ReplaceAll(html, "<h3>", "<h2>")
+	modifiedHtml := strings.ReplaceAll(html, "<h2", "<h1")
+	modifiedHtml = strings.ReplaceAll(html, "</h2", "</h1")
+	modifiedHtml = strings.ReplaceAll(html, "<h3", "<h2")
+	modifiedHtml = strings.ReplaceAll(html, "</h3", "</h2")
 	return "<h1>" + title + "</h1>" + modifiedHtml
 }
