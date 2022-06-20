@@ -29,7 +29,7 @@ func BlogHandler(c *fiber.Ctx, MEDIUM_SECRET string, MEDIUM_USER_ID string) erro
 	mediumPost := blogStructs.SMediumPost{
 		Title:         post.Title,
 		ContentFormat: "html",
-		Content:       GhostToMediumHtmlConverter(post.Html, post.Title),
+		Content:       GhostToMediumHtmlConverter(post.Html, post.Title, post.FeatureImage),
 		PublishStatus: "draft",
 		CanonicalUrl:  "https://banano.cc/blog/" + post.Slug,
 		Tags:          tags,
@@ -60,7 +60,7 @@ func BlogHandler(c *fiber.Ctx, MEDIUM_SECRET string, MEDIUM_USER_ID string) erro
 	return c.JSON(r)
 }
 
-func GhostToMediumHtmlConverter(html string, title string) string {
-	resHtml := "<h1>" + title + "</h1>" + html
+func GhostToMediumHtmlConverter(html string, title string, featureImage string) string {
+	resHtml := fmt.Sprintf(`<h1>%s</h1><img src="%s"/>%s`, title, featureImage, html)
 	return resHtml
 }
