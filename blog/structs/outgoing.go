@@ -1,12 +1,12 @@
 package blogStructs
 
 type SMediumPost struct {
-	Title         string `json:"title"`
-	ContentFormat string `json:"contentFormat"`
-	Content       string `json:"content"`
-	CanonicalUrl  string `json:"canonicalUrl"`
-	PublishStatus string `json:"publishStatus"`
-	/* 	Tags          []string `json:"tags"` */
+	Title         string   `json:"title"`
+	ContentFormat string   `json:"contentFormat"`
+	Content       string   `json:"content"`
+	CanonicalUrl  string   `json:"canonicalUrl"`
+	PublishStatus string   `json:"publishStatus"`
+	Tags          []string `json:"tags"`
 }
 
 type SBlogResponse struct {

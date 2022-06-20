@@ -22,12 +22,17 @@ func BlogHandler(c *fiber.Ctx, MEDIUM_SECRET string, MEDIUM_USER_ID string) erro
 	post := payload.Post.Current
 
 	mediumPostEndpoint := "https://api.medium.com/v1/users/" + MEDIUM_USER_ID + "/posts"
+	var tags []string
+	for _, tag := range post.Tags {
+		tags = append(tags, tag.Name)
+	}
 	mediumPost := blogStructs.SMediumPost{
 		Title:         post.Title,
 		ContentFormat: "html",
 		Content:       GhostToMediumHtmlConverter(post.Html, post.Title),
 		PublishStatus: "draft",
 		CanonicalUrl:  "https://banano.cc/blog/" + post.Slug,
+		Tags:          tags,
 	}
 
 	mediumPostJson, err := json.Marshal(mediumPost)
