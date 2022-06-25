@@ -11,7 +11,12 @@ import (
 	blogStructs "github.com/yekta/banano-price-service/blog/structs"
 )
 
-func BlogHandler(c *fiber.Ctx, MEDIUM_SECRET string, MEDIUM_USER_ID string) error {
+func BlogHandler(c *fiber.Ctx, MEDIUM_SECRET string, MEDIUM_USER_ID string, GHOST_TO_MEDIUM_SECRET string) error {
+	key := c.Params("key")
+	if key != GHOST_TO_MEDIUM_SECRET {
+		log.Println("BlogHandler: Not authorized")
+		return c.Status(http.StatusUnauthorized).SendString("Not authorized")
+	}
 	log.Println("BlogHandler triggered...")
 
 	var payload blogStructs.SGhostPostWebhook

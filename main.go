@@ -21,6 +21,7 @@ var prices priceStructs.SPrices
 func main() {
 	MEDIUM_SECRET := GetEnv("MEDIUM_SECRET")
 	MEDIUM_USER_ID := GetEnv("MEDIUM_USER_ID")
+	GHOST_TO_MEDIUM_SECRET := GetEnv("GHOST_TO_MEDIUM_SECRET")
 
 	serverPort := flag.Int("port", 3000, "Port to listen on")
 
@@ -39,7 +40,7 @@ func main() {
 	})
 
 	app.Post("/blog", func(c *fiber.Ctx) error {
-		return blog.BlogHandler(c, MEDIUM_SECRET, MEDIUM_USER_ID)
+		return blog.BlogHandler(c, MEDIUM_SECRET, MEDIUM_USER_ID, GHOST_TO_MEDIUM_SECRET)
 	})
 
 	log.Fatal(app.Listen(fmt.Sprintf(":%d", *serverPort)))
