@@ -22,6 +22,8 @@ func main() {
 	MEDIUM_SECRET := GetEnv("MEDIUM_SECRET")
 	MEDIUM_USER_ID := GetEnv("MEDIUM_USER_ID")
 	GHOST_TO_MEDIUM_SECRET := GetEnv("GHOST_TO_MEDIUM_SECRET")
+	TYPESENSE_ADMIN_API_KEY := GetEnv("TYPESENSE_ADMIN_API_KEY")
+	GHOST_API_KEY := GetEnv("GHOST_API_KEY")
 
 	serverPort := flag.Int("port", 3000, "Port to listen on")
 
@@ -40,7 +42,7 @@ func main() {
 	})
 
 	app.Post("/blog", func(c *fiber.Ctx) error {
-		return blog.BlogHandler(c, MEDIUM_SECRET, MEDIUM_USER_ID, GHOST_TO_MEDIUM_SECRET)
+		return blog.BlogHandler(c, MEDIUM_SECRET, MEDIUM_USER_ID, GHOST_TO_MEDIUM_SECRET, TYPESENSE_ADMIN_API_KEY, GHOST_API_KEY)
 	})
 
 	log.Fatal(app.Listen(fmt.Sprintf(":%d", *serverPort)))

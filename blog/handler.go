@@ -6,12 +6,15 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"strings"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/typesense/typesense-go/typesense"
+	"github.com/typesense/typesense-go/typesense/api"
 	blogStructs "github.com/yekta/banano-price-service/blog/structs"
 )
 
-func BlogHandler(c *fiber.Ctx, MEDIUM_SECRET string, MEDIUM_USER_ID string, GHOST_TO_MEDIUM_SECRET string) error {
+func BlogHandler(c *fiber.Ctx, MEDIUM_SECRET string, MEDIUM_USER_ID string, GHOST_TO_MEDIUM_SECRET string, TYPESENSE_ADMIN_API_KEY string, GHOST_API_KEY string) error {
 	key := c.Query("key")
 	if key != GHOST_TO_MEDIUM_SECRET {
 		log.Println("BlogHandler: Not authorized")
@@ -62,10 +65,132 @@ func BlogHandler(c *fiber.Ctx, MEDIUM_SECRET string, MEDIUM_USER_ID string, GHOS
 		},
 	}
 	log.Printf(`Submitted the post to Medium with the title "%s"...`, post.Title)
+
+	// Typesense stuff starts here
+	fields := [...]string{
+		"id",
+		"title",
+		"slug",
+		"published_at",
+		"excerpt",
+		"custom_excerpt",
+		"feature_image",
+	}
+	formats := [...]string{"mobiledoc", "html", "plaintext"}
+	include := [...]string{"tags"}
+	blogApiUrl := "https://ghost.banano.cc/ghost/api/content"
+	fieldsStr := strings.Join(fields[:], ",")
+	formatsStr := strings.Join(formats[:], ",")
+	includeStr := strings.Join(include[:], ",")
+	blogEndpoint := fmt.Sprintf(`%s/posts?key=%s&fields=%s&formats=%s&include=%s`, blogApiUrl, GHOST_API_KEY, fieldsStr, formatsStr, includeStr)
+
+	resp, err = http.Get(blogEndpoint)
+	if err != nil {
+		return fmt.Errorf("Got error %s", err.Error())
+	}
+	var ghostPosts blogStructs.SGhostPostsRepsonse
+	json.NewDecoder(resp.Body).Decode(&ghostPosts)
+
+	blogPostsForTypesense := []interface{}{
+		struct {
+			Id            string                      `json:"id"`
+			Title         string                      `json:"title"`
+			Slug          string                      `json:"slug"`
+			PublishedAt   string                      `json:"publishedAt"`
+			Excerpt       string                      `json:"excerpt"`
+			CustomExcerpt string                      `json:"customExcerpt"`
+			FeatureImage  string                      `json:"featureImage"`
+			Tags          []blogStructs.SGhostPostTag `json:"tags"`
+		}{},
+	}
+
+	for _, blogPost := range ghostPosts.Posts {
+		blogPostsForTypesense = append(blogPostsForTypesense, blogStructs.SBlogPostForTypesense{
+			Id:            blogPost.Id,
+			Title:         blogPost.Title,
+			Slug:          blogPost.Slug,
+			PublishedAt:   blogPost.PublishedAt,
+			Excerpt:       blogPost.Excerpt,
+			CustomExcerpt: blogPost.CustomExcerpt,
+			FeatureImage:  blogPost.FeatureImage,
+			Tags:          blogPost.Tags,
+		})
+	}
+
+	typesenseClient := typesense.NewClient(
+		typesense.WithServer("https://typesense.banano.cc"),
+		typesense.WithAPIKey(TYPESENSE_ADMIN_API_KEY))
+	typesenseClient.Collection("blog-posts").Delete()
+	schema := &api.CollectionSchema{
+		Name: "blog-posts",
+		Fields: []api.Field{
+			{
+				Name: "id",
+				Type: "string",
+			},
+			{
+				Name: "title",
+				Type: "string",
+			},
+			{
+				Name: "slug",
+				Type: "string",
+			},
+			{
+				Name: "published_at",
+				Type: "int64",
+			},
+			{
+				Name: "excerpt",
+				Type: "string",
+			},
+			{
+				Name: "custom_excerpt",
+				Type: "string",
+			},
+			{
+				Name: "feature_image",
+				Type: "string",
+			},
+			{
+				Name:  "tags",
+				Type:  "string[]",
+				Facet: newTrue(),
+			},
+		},
+		DefaultSortingField: defaultSortingField(),
+	}
+	typesenseClient.Collections().Create(schema)
+	params := &api.ImportDocumentsParams{
+		Action:    action(),
+		BatchSize: batchSize(),
+	}
+	typesenseClient.Collection("blog-posts").Documents().Import(blogPostsForTypesense, params)
+
 	return c.JSON(r)
 }
 
 func GhostToMediumHtmlConverter(html string, title string) string {
 	resHtml := fmt.Sprintf(`<h1>%s</h1>%s`, title, html)
 	return resHtml
+}
+
+func newTrue() *bool {
+	b := true
+	return &b
+}
+
+func defaultSortingField() *string {
+	f := "published_at"
+	return &f
+}
+
+func batchSize() *int {
+	f := 500
+	return &f
+}
+
+func action() *string {
+	f := "create"
+	return &f
 }

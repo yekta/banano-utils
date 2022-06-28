@@ -22,3 +22,21 @@ type SGhostPostTag struct {
 	Name string `json:"name"`
 	Slug string `json:"slug"`
 }
+
+type SGhostPostsRepsonse struct {
+	Posts []SGhostPost `json:"posts"`
+}
+
+type SGhostPost struct {
+	Id            string          `json:"id"`
+	Title         string          `json:"title"`
+	Slug          string          `json:"slug"`
+	PublishedAt   string          `json:"published_at"`
+	Excerpt       string          `json:"excerpt"`
+	CustomExcerpt string          `json:"custom_excerpt"`
+	FeatureImage  string          `json:"feature_image"`
+	Tags          []SGhostPostTag `json:"tags"`
+	Html          string          `json:"html"`
+	Mobiledoc     string          `json:"mobiledoc"`
+	Plaintext     string          `json:"plaintext"`
+}

@@ -20,3 +20,14 @@ type SBlogResponseData struct {
 type SBlogResponseError struct {
 	Message string `json:"message"`
 }
+
+type SBlogPostForTypesense struct {
+	Id            string          `json:"id"`
+	Title         string          `json:"title"`
+	Slug          string          `json:"slug"`
+	PublishedAt   string          `json:"publishedAt"`
+	Excerpt       string          `json:"excerpt"`
+	CustomExcerpt string          `json:"customExcerpt"`
+	FeatureImage  string          `json:"featureImage"`
+	Tags          []SGhostPostTag `json:"tags"`
+}

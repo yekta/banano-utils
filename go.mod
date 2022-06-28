@@ -5,6 +5,12 @@ go 1.18
 require (
 	github.com/gofiber/fiber/v2 v2.34.0
 	github.com/robfig/cron/v3 v3.0.0
+	github.com/typesense/typesense-go v0.5.0
+)
+
+require (
+	github.com/deepmap/oapi-codegen v1.9.0 // indirect
+	github.com/sony/gobreaker v0.5.0 // indirect
 )
 
 require (
