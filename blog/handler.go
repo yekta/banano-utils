@@ -122,8 +122,12 @@ func BlogHandler(c *fiber.Ctx, MEDIUM_SECRET string, MEDIUM_USER_ID string, GHOS
 	typesenseClient := typesense.NewClient(
 		typesense.WithServer("https://typesense.banano.cc"),
 		typesense.WithAPIKey(TYPESENSE_ADMIN_API_KEY))
-	typesenseClient.Collection("blog-posts").Delete()
-	log.Println("BlogHandler: Typesense collection deleted...")
+	_, errDel := typesenseClient.Collection("blog-posts").Delete()
+	if errDel != nil {
+		log.Println("BlogHandler: Error deleting collection:", errDel)
+	} else {
+		log.Println("BlogHandler: Typesense collection deleted...")
+	}
 
 	schema := &api.CollectionSchema{
 		Name: "blog-posts",
@@ -164,18 +168,23 @@ func BlogHandler(c *fiber.Ctx, MEDIUM_SECRET string, MEDIUM_USER_ID string, GHOS
 		},
 		DefaultSortingField: defaultSortingField(),
 	}
-	typesenseClient.Collections().Create(schema)
-	log.Println("BlogHandler: New Typesense collection created...")
+	_, errCreate := typesenseClient.Collections().Create(schema)
+	if errCreate != nil {
+		return fmt.Errorf("Got error %s", errCreate.Error())
+	} else {
+		log.Println("BlogHandler: New Typesense collection created...")
+	}
 
 	params := &api.ImportDocumentsParams{
 		Action:    action(),
 		BatchSize: batchSize(),
 	}
-	res, err := typesenseClient.Collection("blog-posts").Documents().Import(blogPostsForTypesense, params)
-	if err != nil {
+	_, errImport := typesenseClient.Collection("blog-posts").Documents().Import(blogPostsForTypesense, params)
+	if errImport != nil {
 		return fmt.Errorf("Got error %s", err.Error())
+	} else {
+		log.Printf("BlogHandler: Imported documents to Typesense...")
 	}
-	log.Printf("BlogHandler: Imported %v documents to Typesense...", res)
 
 	return c.JSON(r)
 }
