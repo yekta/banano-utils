@@ -22,12 +22,11 @@ type SBlogResponseError struct {
 }
 
 type SBlogPostForTypesense struct {
-	Id            string          `json:"id"`
-	Title         string          `json:"title"`
-	Slug          string          `json:"slug"`
-	PublishedAt   string          `json:"publishedAt"`
-	Excerpt       string          `json:"excerpt"`
-	CustomExcerpt string          `json:"customExcerpt"`
-	FeatureImage  string          `json:"featureImage"`
-	Tags          []SGhostPostTag `json:"tags"`
+	Id            string `json:"id"`
+	Title         string `json:"title"`
+	Slug          string `json:"slug"`
+	PublishedAt   uint64 `json:"published_at"`
+	Excerpt       string `json:"excerpt"`
+	CustomExcerpt string `json:"custom_excerpt"`
+	FeatureImage  string `json:"feature_image"`
 }

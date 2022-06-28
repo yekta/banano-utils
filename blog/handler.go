@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/typesense/typesense-go/typesense"
@@ -66,6 +67,13 @@ func BlogHandler(c *fiber.Ctx, MEDIUM_SECRET string, MEDIUM_USER_ID string, GHOS
 	}
 	log.Printf(`Submitted the post to Medium with the title "%s"...`, post.Title)
 
+	// Typesense stuff
+	HandleTypesense(TYPESENSE_ADMIN_API_KEY, GHOST_API_KEY)
+
+	return c.JSON(r)
+}
+
+func HandleTypesense(TYPESENSE_ADMIN_API_KEY string, GHOST_API_KEY string) error {
 	// Typesense stuff starts here
 	fields := [...]string{
 		"id",
@@ -82,9 +90,9 @@ func BlogHandler(c *fiber.Ctx, MEDIUM_SECRET string, MEDIUM_USER_ID string, GHOS
 	fieldsStr := strings.Join(fields[:], ",")
 	formatsStr := strings.Join(formats[:], ",")
 	includeStr := strings.Join(include[:], ",")
-	blogEndpoint := fmt.Sprintf(`%s/posts?key=%s&fields=%s&formats=%s&include=%s`, blogApiUrl, GHOST_API_KEY, fieldsStr, formatsStr, includeStr)
+	blogEndpoint := fmt.Sprintf(`%s/posts?key=%s&fields=%s&formats=%s&include=%s&limit=%v`, blogApiUrl, GHOST_API_KEY, fieldsStr, formatsStr, includeStr, 500)
 
-	resp, err = http.Get(blogEndpoint)
+	resp, err := http.Get(blogEndpoint)
 	if err != nil {
 		return fmt.Errorf("Got error %s", err.Error())
 	}
@@ -93,29 +101,18 @@ func BlogHandler(c *fiber.Ctx, MEDIUM_SECRET string, MEDIUM_USER_ID string, GHOS
 
 	log.Println("BlogHandler: Got Ghost blog posts...")
 
-	blogPostsForTypesense := []interface{}{
-		struct {
-			Id            string                      `json:"id"`
-			Title         string                      `json:"title"`
-			Slug          string                      `json:"slug"`
-			PublishedAt   string                      `json:"publishedAt"`
-			Excerpt       string                      `json:"excerpt"`
-			CustomExcerpt string                      `json:"customExcerpt"`
-			FeatureImage  string                      `json:"featureImage"`
-			Tags          []blogStructs.SGhostPostTag `json:"tags"`
-		}{},
-	}
-
-	for _, blogPost := range ghostPosts.Posts {
+	var blogPostsForTypesense []interface{}
+	for _, post := range ghostPosts.Posts {
+		t, _ := time.Parse("2006-01-02T15:04:05.000+15:04", post.PublishedAt)
+		log.Println(t.UnixMilli())
 		blogPostsForTypesense = append(blogPostsForTypesense, blogStructs.SBlogPostForTypesense{
-			Id:            blogPost.Id,
-			Title:         blogPost.Title,
-			Slug:          blogPost.Slug,
-			PublishedAt:   blogPost.PublishedAt,
-			Excerpt:       blogPost.Excerpt,
-			CustomExcerpt: blogPost.CustomExcerpt,
-			FeatureImage:  blogPost.FeatureImage,
-			Tags:          blogPost.Tags,
+			Id:            post.Id,
+			Title:         post.Title,
+			Slug:          post.Slug,
+			PublishedAt:   uint64(t.UnixMilli()),
+			Excerpt:       post.Excerpt,
+			CustomExcerpt: post.CustomExcerpt,
+			FeatureImage:  post.FeatureImage,
 		})
 	}
 
@@ -132,10 +129,6 @@ func BlogHandler(c *fiber.Ctx, MEDIUM_SECRET string, MEDIUM_USER_ID string, GHOS
 	schema := &api.CollectionSchema{
 		Name: "blog-posts",
 		Fields: []api.Field{
-			{
-				Name: "id",
-				Type: "string",
-			},
 			{
 				Name: "title",
 				Type: "string",
@@ -160,17 +153,12 @@ func BlogHandler(c *fiber.Ctx, MEDIUM_SECRET string, MEDIUM_USER_ID string, GHOS
 				Name: "feature_image",
 				Type: "string",
 			},
-			{
-				Name:  "tags",
-				Type:  "string[]",
-				Facet: newTrue(),
-			},
 		},
 		DefaultSortingField: defaultSortingField(),
 	}
 	_, errCreate := typesenseClient.Collections().Create(schema)
 	if errCreate != nil {
-		return fmt.Errorf("Got error %s", errCreate.Error())
+		log.Printf("Got error %s", errCreate.Error())
 	} else {
 		log.Println("BlogHandler: New Typesense collection created...")
 	}
@@ -181,12 +169,12 @@ func BlogHandler(c *fiber.Ctx, MEDIUM_SECRET string, MEDIUM_USER_ID string, GHOS
 	}
 	_, errImport := typesenseClient.Collection("blog-posts").Documents().Import(blogPostsForTypesense, params)
 	if errImport != nil {
-		return fmt.Errorf("Got error %s", err.Error())
+		log.Printf("Got error %s", err.Error())
 	} else {
 		log.Printf("BlogHandler: Imported documents to Typesense...")
 	}
 
-	return c.JSON(r)
+	return errImport
 }
 
 func GhostToMediumHtmlConverter(html string, title string) string {
@@ -205,7 +193,7 @@ func defaultSortingField() *string {
 }
 
 func batchSize() *int {
-	f := 50
+	f := 500
 	return &f
 }
 
