@@ -91,6 +91,8 @@ func BlogHandler(c *fiber.Ctx, MEDIUM_SECRET string, MEDIUM_USER_ID string, GHOS
 	var ghostPosts blogStructs.SGhostPostsRepsonse
 	json.NewDecoder(resp.Body).Decode(&ghostPosts)
 
+	log.Println("BlogHandler: Got Ghost blog posts...")
+
 	blogPostsForTypesense := []interface{}{
 		struct {
 			Id            string                      `json:"id"`
@@ -121,6 +123,8 @@ func BlogHandler(c *fiber.Ctx, MEDIUM_SECRET string, MEDIUM_USER_ID string, GHOS
 		typesense.WithServer("https://typesense.banano.cc"),
 		typesense.WithAPIKey(TYPESENSE_ADMIN_API_KEY))
 	typesenseClient.Collection("blog-posts").Delete()
+	log.Println("BlogHandler: Typesense collection deleted...")
+
 	schema := &api.CollectionSchema{
 		Name: "blog-posts",
 		Fields: []api.Field{
@@ -161,11 +165,14 @@ func BlogHandler(c *fiber.Ctx, MEDIUM_SECRET string, MEDIUM_USER_ID string, GHOS
 		DefaultSortingField: defaultSortingField(),
 	}
 	typesenseClient.Collections().Create(schema)
+	log.Println("BlogHandler: New Typesense collection created...")
+
 	params := &api.ImportDocumentsParams{
 		Action:    action(),
 		BatchSize: batchSize(),
 	}
 	typesenseClient.Collection("blog-posts").Documents().Import(blogPostsForTypesense, params)
+	log.Println("BlogHandler: Typesense collection imported...")
 
 	return c.JSON(r)
 }
