@@ -171,8 +171,11 @@ func BlogHandler(c *fiber.Ctx, MEDIUM_SECRET string, MEDIUM_USER_ID string, GHOS
 		Action:    action(),
 		BatchSize: batchSize(),
 	}
-	typesenseClient.Collection("blog-posts").Documents().Import(blogPostsForTypesense, params)
-	log.Println("BlogHandler: Typesense collection imported...")
+	res, err := typesenseClient.Collection("blog-posts").Documents().Import(blogPostsForTypesense, params)
+	if err != nil {
+		return fmt.Errorf("Got error %s", err.Error())
+	}
+	log.Printf("BlogHandler: Imported %v documents to Typesense...", res)
 
 	return c.JSON(r)
 }
@@ -193,7 +196,7 @@ func defaultSortingField() *string {
 }
 
 func batchSize() *int {
-	f := 500
+	f := 50
 	return &f
 }
 
