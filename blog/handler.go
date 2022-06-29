@@ -99,12 +99,11 @@ func HandleTypesense(TYPESENSE_ADMIN_API_KEY string, GHOST_API_KEY string) error
 	var ghostPosts blogStructs.SGhostPostsRepsonse
 	json.NewDecoder(resp.Body).Decode(&ghostPosts)
 
-	log.Println("BlogHandler: Got Ghost blog posts...")
+	log.Println("TypesenseHandler: Got Ghost blog posts...")
 
 	var blogPostsForTypesense []interface{}
 	for _, post := range ghostPosts.Posts {
 		t, _ := time.Parse("2006-01-02T15:04:05.000+15:04", post.PublishedAt)
-		log.Println(t.UnixMilli())
 		blogPostsForTypesense = append(blogPostsForTypesense, blogStructs.SBlogPostForTypesense{
 			Id:            post.Id,
 			Title:         post.Title,
@@ -119,20 +118,24 @@ func HandleTypesense(TYPESENSE_ADMIN_API_KEY string, GHOST_API_KEY string) error
 
 	typesenseClient := typesense.NewClient(
 		typesense.WithServer("https://typesense.banano.cc"),
-		typesense.WithAPIKey(TYPESENSE_ADMIN_API_KEY))
+		typesense.WithAPIKey(TYPESENSE_ADMIN_API_KEY),
+		typesense.WithConnectionTimeout(60*time.Second))
+
 	_, errDel := typesenseClient.Collection("blog-posts").Delete()
+
 	if errDel != nil {
-		log.Println("BlogHandler: Error deleting collection:", errDel)
+		log.Println("TypesenseHandler: Error deleting collection:", errDel)
 	} else {
-		log.Println("BlogHandler: Typesense collection deleted...")
+		log.Println("TypesenseHandler: Typesense collection deleted...")
 	}
 
 	schema := &api.CollectionSchema{
 		Name: "blog-posts",
 		Fields: []api.Field{
 			{
-				Name: "title",
-				Type: "string",
+				Name:  "title",
+				Type:  "string",
+				Infix: newTrue(),
 			},
 			{
 				Name: "slug",
@@ -143,42 +146,49 @@ func HandleTypesense(TYPESENSE_ADMIN_API_KEY string, GHOST_API_KEY string) error
 				Type: "int64",
 			},
 			{
-				Name: "excerpt",
-				Type: "string",
+				Name:  "excerpt",
+				Type:  "string",
+				Infix: newTrue(),
 			},
 			{
-				Name: "custom_excerpt",
-				Type: "string",
+				Name:     "custom_excerpt",
+				Type:     "string",
+				Infix:    newTrue(),
+				Optional: newTrue(),
 			},
 			{
-				Name: "feature_image",
-				Type: "string",
+				Name:     "feature_image",
+				Type:     "string",
+				Optional: newTrue(),
 			},
 			{
-				Name: "plaintext",
-				Type: "string",
+				Name:  "plaintext",
+				Type:  "string",
+				Infix: newTrue(),
 			},
 		},
 		DefaultSortingField: defaultSortingField(),
 	}
+
 	_, errCreate := typesenseClient.Collections().Create(schema)
 	if errCreate != nil {
-		log.Printf("Got error %s", errCreate.Error())
+		log.Printf("Got error %s", errCreate)
 	} else {
-		log.Println("BlogHandler: New Typesense collection created...")
+		log.Println("TypesenseHandler: New Typesense collection created...")
 	}
 
 	params := &api.ImportDocumentsParams{
 		Action:    action(),
 		BatchSize: batchSize(),
 	}
-	_, errImport := typesenseClient.Collection("blog-posts").Documents().Import(blogPostsForTypesense, params)
-	if errImport != nil {
-		log.Printf("Got error %s", err.Error())
-	} else {
-		log.Printf("BlogHandler: Imported documents to Typesense...")
-	}
 
+	_, errImport := typesenseClient.Collection("blog-posts").Documents().Import(blogPostsForTypesense, params)
+
+	if errImport != nil {
+		log.Printf("Got error %s", errImport)
+	} else {
+		log.Printf("TypesenseHandler: Imported documents to Typesense...")
+	}
 	return errImport
 }
 
@@ -190,6 +200,7 @@ func TypesenseReindexHandler(c *fiber.Ctx, TYPESENSE_ADMIN_API_KEY string, GHOST
 	}
 	log.Println("TypesenseReindexHandler triggered...")
 	HandleTypesense(TYPESENSE_ADMIN_API_KEY, GHOST_API_KEY)
+	log.Println("TypesenseReindexHandler finished executing...")
 	return c.JSON("ok")
 }
 
