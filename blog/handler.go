@@ -83,6 +83,7 @@ func HandleTypesense(TYPESENSE_ADMIN_API_KEY string, GHOST_API_KEY string) error
 		"excerpt",
 		"custom_excerpt",
 		"feature_image",
+		"plaintext",
 	}
 	formats := [...]string{"mobiledoc", "html", "plaintext"}
 	include := [...]string{"tags"}
@@ -113,6 +114,7 @@ func HandleTypesense(TYPESENSE_ADMIN_API_KEY string, GHOST_API_KEY string) error
 			Excerpt:       post.Excerpt,
 			CustomExcerpt: post.CustomExcerpt,
 			FeatureImage:  post.FeatureImage,
+			PlainText:     post.Plaintext,
 		})
 	}
 
@@ -151,6 +153,10 @@ func HandleTypesense(TYPESENSE_ADMIN_API_KEY string, GHOST_API_KEY string) error
 			},
 			{
 				Name: "feature_image",
+				Type: "string",
+			},
+			{
+				Name: "plaintext",
 				Type: "string",
 			},
 		},

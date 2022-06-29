@@ -29,4 +29,5 @@ type SBlogPostForTypesense struct {
 	Excerpt       string `json:"excerpt"`
 	CustomExcerpt string `json:"custom_excerpt"`
 	FeatureImage  string `json:"feature_image"`
+	PlainText     string `json:"plaintext"`
 }
