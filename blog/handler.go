@@ -108,11 +108,11 @@ func HandleTypesense(TYPESENSE_ADMIN_API_KEY string, GHOST_API_KEY string) error
 			Id:            post.Id,
 			Title:         post.Title,
 			Slug:          post.Slug,
-			PublishedAt:   uint64(t.UnixMilli()),
-			Excerpt:       post.Excerpt,
 			CustomExcerpt: post.CustomExcerpt,
-			FeatureImage:  post.FeatureImage,
+			Excerpt:       post.Excerpt,
 			PlainText:     post.Plaintext,
+			FeatureImage:  post.FeatureImage,
+			PublishedAt:   uint64(t.UnixMilli()),
 		})
 	}
 
@@ -138,17 +138,18 @@ func HandleTypesense(TYPESENSE_ADMIN_API_KEY string, GHOST_API_KEY string) error
 				Infix: newTrue(),
 			},
 			{
-				Name: "slug",
-				Type: "string",
+				Name:  "excerpt",
+				Type:  "string",
+				Infix: newTrue(),
+			},
+			{
+				Name:  "slug",
+				Type:  "string",
+				Infix: newTrue(),
 			},
 			{
 				Name: "published_at",
 				Type: "int64",
-			},
-			{
-				Name:  "excerpt",
-				Type:  "string",
-				Infix: newTrue(),
 			},
 			{
 				Name:     "custom_excerpt",
@@ -157,14 +158,14 @@ func HandleTypesense(TYPESENSE_ADMIN_API_KEY string, GHOST_API_KEY string) error
 				Optional: newTrue(),
 			},
 			{
-				Name:     "feature_image",
-				Type:     "string",
-				Optional: newTrue(),
-			},
-			{
 				Name:  "plaintext",
 				Type:  "string",
 				Infix: newTrue(),
+			},
+			{
+				Name:     "feature_image",
+				Type:     "string",
+				Optional: newTrue(),
 			},
 		},
 		DefaultSortingField: defaultSortingField(),
