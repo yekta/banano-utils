@@ -83,7 +83,6 @@ func HandleTypesense(TYPESENSE_ADMIN_API_KEY string, GHOST_API_KEY string) error
 		"excerpt",
 		"custom_excerpt",
 		"feature_image",
-		"plaintext",
 	}
 	formats := [...]string{"mobiledoc", "html", "plaintext"}
 	include := [...]string{"tags"}
