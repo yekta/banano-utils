@@ -45,6 +45,10 @@ func main() {
 		return blog.BlogHandler(c, MEDIUM_SECRET, MEDIUM_USER_ID, GHOST_TO_MEDIUM_SECRET, TYPESENSE_ADMIN_API_KEY, GHOST_API_KEY)
 	})
 
+	app.Get("/typesense-reindex", func(c *fiber.Ctx) error {
+		return blog.BlogHandler(c, TYPESENSE_ADMIN_API_KEY, GHOST_API_KEY)
+	})
+
 	log.Fatal(app.Listen(fmt.Sprintf(":%d", *serverPort)))
 }
 

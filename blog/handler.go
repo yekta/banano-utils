@@ -182,6 +182,17 @@ func HandleTypesense(TYPESENSE_ADMIN_API_KEY string, GHOST_API_KEY string) error
 	return errImport
 }
 
+func TypesenseReindexHandler(c *fiber.Ctx, TYPESENSE_ADMIN_API_KEY string, GHOST_API_KEY string) error {
+	key := c.Query("key")
+	if key != TYPESENSE_ADMIN_API_KEY {
+		log.Println("TypesenseReindexHandler: Not authorized")
+		return c.Status(http.StatusUnauthorized).SendString("Not authorized")
+	}
+	log.Println("TypesenseReindexHandler triggered...")
+	HandleTypesense(TYPESENSE_ADMIN_API_KEY, GHOST_API_KEY)
+	return c.JSON("ok")
+}
+
 func GhostToMediumHtmlConverter(html string, title string) string {
 	resHtml := fmt.Sprintf(`<h1>%s</h1>%s`, title, html)
 	return resHtml
