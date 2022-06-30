@@ -138,14 +138,12 @@ func HandleTypesense(TYPESENSE_ADMIN_API_KEY string, GHOST_API_KEY string) error
 				Infix: newTrue(),
 			},
 			{
-				Name:  "excerpt",
-				Type:  "string",
-				Infix: newTrue(),
+				Name: "excerpt",
+				Type: "string",
 			},
 			{
-				Name:  "slug",
-				Type:  "string",
-				Infix: newTrue(),
+				Name: "slug",
+				Type: "string",
 			},
 			{
 				Name: "published_at",
@@ -154,13 +152,11 @@ func HandleTypesense(TYPESENSE_ADMIN_API_KEY string, GHOST_API_KEY string) error
 			{
 				Name:     "custom_excerpt",
 				Type:     "string",
-				Infix:    newTrue(),
 				Optional: newTrue(),
 			},
 			{
-				Name:  "plaintext",
-				Type:  "string",
-				Infix: newTrue(),
+				Name: "plaintext",
+				Type: "string",
 			},
 			{
 				Name:     "feature_image",
