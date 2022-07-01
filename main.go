@@ -36,6 +36,7 @@ func main() {
 	cron.Start()
 
 	GetAndSetPrices()
+	blog.HandleTypesense(TYPESENSE_ADMIN_API_KEY, GHOST_API_KEY)
 
 	app.Get("/prices", func(c *fiber.Ctx) error {
 		return c.JSON(prices)
