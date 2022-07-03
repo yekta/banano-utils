@@ -67,13 +67,13 @@ func GetPrices() priceStructs.SPrices {
 	c2 := make(chan priceStructs.SPriceSet)
 
 	go func() {
-		defer close(c1)
 		c1 <- priceSources.GetCoinGecko()
+		defer close(c1)
 	}()
 
 	go func() {
-		defer close(c2)
 		c2 <- priceSources.GetCoinex()
+		defer close(c2)
 	}()
 
 	res.CoinGecko = <-c1
