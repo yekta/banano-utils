@@ -35,8 +35,8 @@ func main() {
 	cron.AddFunc("@every 15s", GetAndSetPrices)
 	cron.Start()
 
-	GetAndSetPrices()
-	blog.HandleTypesense(TYPESENSE_ADMIN_API_KEY, GHOST_API_KEY)
+	go GetAndSetPrices()
+	go blog.HandleTypesense(TYPESENSE_ADMIN_API_KEY, GHOST_API_KEY)
 
 	app.Get("/prices", func(c *fiber.Ctx) error {
 		return c.JSON(prices)
