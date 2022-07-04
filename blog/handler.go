@@ -202,7 +202,7 @@ func IndexTypesense() error {
 
 func TypesenseReindexHandler(c *fiber.Ctx) error {
 	key := c.Query("key")
-	if key != TYPESENSE_ADMIN_API_KEY {
+	if key != GHOST_TO_MEDIUM_SECRET {
 		log.Println("TypesenseReindexHandler: Not authorized")
 		return c.Status(http.StatusUnauthorized).SendString("Not authorized")
 	}
