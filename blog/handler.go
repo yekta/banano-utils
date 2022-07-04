@@ -21,9 +21,10 @@ var GHOST_API_KEY = sharedUtils.GetEnv("GHOST_API_KEY")
 var GHOST_TO_MEDIUM_SECRET = sharedUtils.GetEnv("GHOST_TO_MEDIUM_SECRET")
 var MEDIUM_SECRET = sharedUtils.GetEnv("MEDIUM_SECRET")
 var MEDIUM_USER_ID = sharedUtils.GetEnv("MEDIUM_USER_ID")
-var lastPostToMedium = time.Now()
 
 const secondThreshold = 60
+
+var lastPostToMedium = time.Now().Add(time.Second * -1 * secondThreshold)
 
 func GhostToMediumHandler(c *fiber.Ctx) error {
 	key := c.Query("key")
@@ -84,6 +85,7 @@ func GhostToMediumHandler(c *fiber.Ctx) error {
 		},
 	}
 	log.Printf(`Submitted the post to Medium with the title "%s"...`, post.Title)
+	lastPostToMedium = time.Now()
 
 	// Typesense stuff
 	IndexTypesense()
