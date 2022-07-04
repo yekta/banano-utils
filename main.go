@@ -30,11 +30,11 @@ func main() {
 		return prices.PricesHandler(c)
 	})
 
-	app.Post("/blog", func(c *fiber.Ctx) error {
+	app.Post("/blog/ghost-to-medium", func(c *fiber.Ctx) error {
 		return blog.BlogHandler(c)
 	})
 
-	app.Get("/typesense-reindex", func(c *fiber.Ctx) error {
+	app.Get("/blog/typesense-reindex", func(c *fiber.Ctx) error {
 		return blog.TypesenseReindexHandler(c)
 	})
 
