@@ -13,14 +13,14 @@ import (
 	"github.com/typesense/typesense-go/typesense"
 	"github.com/typesense/typesense-go/typesense/api"
 	blogStructs "github.com/yekta/banano-price-service/blog/structs"
-	sharedUtils "github.com/yekta/banano-price-service/shared/utils"
+	sharedUtils "github.com/yekta/banano-price-service/shared"
 )
 
-const TYPESENSE_ADMIN_API_KEY = sharedUtils.GetEnv("TYPESENSE_ADMIN_API_KEY")
-const GHOST_API_KEY = sharedUtils.GetEnv("GHOST_API_KEY")
-const GHOST_TO_MEDIUM_SECRET = sharedUtils.GetEnv("GHOST_TO_MEDIUM_SECRET")
-const MEDIUM_SECRET = sharedUtils.GetEnv("MEDIUM_SECRET")
-const MEDIUM_USER_ID = sharedUtils.GetEnv("MEDIUM_USER_ID")
+var TYPESENSE_ADMIN_API_KEY = sharedUtils.GetEnv("TYPESENSE_ADMIN_API_KEY")
+var GHOST_API_KEY = sharedUtils.GetEnv("GHOST_API_KEY")
+var GHOST_TO_MEDIUM_SECRET = sharedUtils.GetEnv("GHOST_TO_MEDIUM_SECRET")
+var MEDIUM_SECRET = sharedUtils.GetEnv("MEDIUM_SECRET")
+var MEDIUM_USER_ID = sharedUtils.GetEnv("MEDIUM_USER_ID")
 
 func BlogHandler(c *fiber.Ctx) error {
 	key := c.Query("key")
