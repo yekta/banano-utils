@@ -90,7 +90,8 @@ func HandleTypesense(TYPESENSE_ADMIN_API_KEY string, GHOST_API_KEY string) error
 	fieldsStr := strings.Join(fields[:], ",")
 	formatsStr := strings.Join(formats[:], ",")
 	includeStr := strings.Join(include[:], ",")
-	blogEndpoint := fmt.Sprintf(`%s/posts?key=%s&fields=%s&formats=%s&include=%s&limit=%v`, blogApiUrl, GHOST_API_KEY, fieldsStr, formatsStr, includeStr, 500)
+	const limit = 1000
+	blogEndpoint := fmt.Sprintf(`%s/posts?key=%s&fields=%s&formats=%s&include=%s&limit=%v`, blogApiUrl, GHOST_API_KEY, fieldsStr, formatsStr, includeStr, limit)
 
 	resp, err := http.Get(blogEndpoint)
 	if err != nil {
