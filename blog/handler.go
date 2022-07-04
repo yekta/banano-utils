@@ -210,7 +210,11 @@ func TypesenseReindexHandler(c *fiber.Ctx) error {
 }
 
 func GhostToMediumHtmlConverter(html string, title string) string {
-	resHtml := fmt.Sprintf(`<h1>%s</h1>%s`, title, html)
+	s1 := strings.ReplaceAll(html, "<h2>", "<h1>")
+	s2 := strings.ReplaceAll(s1, "</h2>", "</h1>")
+	s3 := strings.ReplaceAll(s2, "<h3>", "<h2>")
+	s4 := strings.ReplaceAll(s3, "</h3>", "</h2>")
+	resHtml := fmt.Sprintf(`<h1>%s</h1>%s`, title, s4)
 	return resHtml
 }
 
