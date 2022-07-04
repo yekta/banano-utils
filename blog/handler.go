@@ -42,10 +42,14 @@ func GhostToMediumHandler(c *fiber.Ctx) error {
 	for _, tag := range post.Tags {
 		tags = append(tags, tag.Name)
 	}
+
+	content := GhostToMediumHtmlConverter(post.Html, post.Title)
+	log.Printf("Content: %s", content)
+
 	mediumPost := blogStructs.SMediumPost{
 		Title:         post.Title,
 		ContentFormat: "html",
-		Content:       GhostToMediumHtmlConverter(post.Html, post.Title),
+		Content:       content,
 		PublishStatus: "draft",
 		CanonicalUrl:  "https://banano.cc/blog/" + post.Slug,
 		Tags:          tags,
