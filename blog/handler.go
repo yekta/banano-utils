@@ -21,6 +21,9 @@ var GHOST_API_KEY = sharedUtils.GetEnv("GHOST_API_KEY")
 var GHOST_TO_MEDIUM_SECRET = sharedUtils.GetEnv("GHOST_TO_MEDIUM_SECRET")
 var MEDIUM_SECRET = sharedUtils.GetEnv("MEDIUM_SECRET")
 var MEDIUM_USER_ID = sharedUtils.GetEnv("MEDIUM_USER_ID")
+var lastPostToMedium = time.Now()
+
+const secondThreshold = 60
 
 func GhostToMediumHandler(c *fiber.Ctx) error {
 	key := c.Query("key")
@@ -28,6 +31,11 @@ func GhostToMediumHandler(c *fiber.Ctx) error {
 		log.Println("GhostToMediumHandler: Not authorized")
 		return c.Status(http.StatusUnauthorized).SendString("Not authorized")
 	}
+	if lastPostToMedium.Add(time.Second * secondThreshold).After(time.Now()) {
+		log.Println("GhostToMediumHandler: Too many requests, skipping")
+		return c.Status(http.StatusTooManyRequests).SendString("Too many requests")
+	}
+
 	log.Println("GhostToMediumHandler triggered...")
 
 	var payload blogStructs.SGhostPostWebhook
