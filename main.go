@@ -31,7 +31,7 @@ func main() {
 	})
 
 	app.Post("/blog/ghost-to-medium", func(c *fiber.Ctx) error {
-		return blog.BlogHandler(c)
+		return blog.GhostToMediumHandler(c)
 	})
 
 	app.Get("/blog/typesense-reindex", func(c *fiber.Ctx) error {

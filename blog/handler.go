@@ -22,13 +22,13 @@ var GHOST_TO_MEDIUM_SECRET = sharedUtils.GetEnv("GHOST_TO_MEDIUM_SECRET")
 var MEDIUM_SECRET = sharedUtils.GetEnv("MEDIUM_SECRET")
 var MEDIUM_USER_ID = sharedUtils.GetEnv("MEDIUM_USER_ID")
 
-func BlogHandler(c *fiber.Ctx) error {
+func GhostToMediumHandler(c *fiber.Ctx) error {
 	key := c.Query("key")
 	if key != GHOST_TO_MEDIUM_SECRET {
-		log.Println("BlogHandler: Not authorized")
+		log.Println("GhostToMediumHandler: Not authorized")
 		return c.Status(http.StatusUnauthorized).SendString("Not authorized")
 	}
-	log.Println("BlogHandler triggered...")
+	log.Println("GhostToMediumHandler triggered...")
 
 	var payload blogStructs.SGhostPostWebhook
 	if err := c.BodyParser(&payload); err != nil {
