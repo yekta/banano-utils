@@ -44,7 +44,6 @@ func GhostToMediumHandler(c *fiber.Ctx) error {
 	}
 
 	content := GhostToMediumHtmlConverter(post.Html, post.Title)
-	log.Printf("Content: %s", content)
 
 	mediumPost := blogStructs.SMediumPost{
 		Title:         post.Title,
@@ -214,9 +213,9 @@ func TypesenseReindexHandler(c *fiber.Ctx) error {
 }
 
 func GhostToMediumHtmlConverter(html string, title string) string {
-	s1 := strings.ReplaceAll(html, "<h2>", "<h1>")
+	s1 := strings.ReplaceAll(html, "<h2", "<h1")
 	s2 := strings.ReplaceAll(s1, "</h2>", "</h1>")
-	s3 := strings.ReplaceAll(s2, "<h3>", "<h2>")
+	s3 := strings.ReplaceAll(s2, "<h3", "<h2")
 	s4 := strings.ReplaceAll(s3, "</h3>", "</h2>")
 	resHtml := fmt.Sprintf(`<h1>%s</h1>%s`, title, s4)
 	return resHtml
