@@ -13,9 +13,16 @@ import (
 	"github.com/typesense/typesense-go/typesense"
 	"github.com/typesense/typesense-go/typesense/api"
 	blogStructs "github.com/yekta/banano-price-service/blog/structs"
+	sharedUtils "github.com/yekta/banano-price-service/shared/utils"
 )
 
-func BlogHandler(c *fiber.Ctx, MEDIUM_SECRET string, MEDIUM_USER_ID string, GHOST_TO_MEDIUM_SECRET string, TYPESENSE_ADMIN_API_KEY string, GHOST_API_KEY string) error {
+const TYPESENSE_ADMIN_API_KEY = sharedUtils.GetEnv("TYPESENSE_ADMIN_API_KEY")
+const GHOST_API_KEY = sharedUtils.GetEnv("GHOST_API_KEY")
+const GHOST_TO_MEDIUM_SECRET = sharedUtils.GetEnv("GHOST_TO_MEDIUM_SECRET")
+const MEDIUM_SECRET = sharedUtils.GetEnv("MEDIUM_SECRET")
+const MEDIUM_USER_ID = sharedUtils.GetEnv("MEDIUM_USER_ID")
+
+func BlogHandler(c *fiber.Ctx) error {
 	key := c.Query("key")
 	if key != GHOST_TO_MEDIUM_SECRET {
 		log.Println("BlogHandler: Not authorized")
@@ -68,12 +75,12 @@ func BlogHandler(c *fiber.Ctx, MEDIUM_SECRET string, MEDIUM_USER_ID string, GHOS
 	log.Printf(`Submitted the post to Medium with the title "%s"...`, post.Title)
 
 	// Typesense stuff
-	HandleTypesense(TYPESENSE_ADMIN_API_KEY, GHOST_API_KEY)
+	IndexTypesense()
 
 	return c.JSON(r)
 }
 
-func HandleTypesense(TYPESENSE_ADMIN_API_KEY string, GHOST_API_KEY string) error {
+func IndexTypesense() error {
 	// Typesense stuff starts here
 	fields := [...]string{
 		"id",
@@ -190,14 +197,14 @@ func HandleTypesense(TYPESENSE_ADMIN_API_KEY string, GHOST_API_KEY string) error
 	return errImport
 }
 
-func TypesenseReindexHandler(c *fiber.Ctx, TYPESENSE_ADMIN_API_KEY string, GHOST_API_KEY string) error {
+func TypesenseReindexHandler(c *fiber.Ctx) error {
 	key := c.Query("key")
 	if key != TYPESENSE_ADMIN_API_KEY {
 		log.Println("TypesenseReindexHandler: Not authorized")
 		return c.Status(http.StatusUnauthorized).SendString("Not authorized")
 	}
 	log.Println("TypesenseReindexHandler triggered...")
-	HandleTypesense(TYPESENSE_ADMIN_API_KEY, GHOST_API_KEY)
+	IndexTypesense()
 	log.Println("TypesenseReindexHandler finished executing...")
 	return c.JSON("ok")
 }

@@ -1,30 +1,18 @@
 package main
 
 import (
-	"encoding/json"
 	"flag"
 	"fmt"
 	"log"
-	"os"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
-	"github.com/joho/godotenv"
 	"github.com/robfig/cron/v3"
 	blog "github.com/yekta/banano-price-service/blog"
-	priceSources "github.com/yekta/banano-price-service/prices/sources"
-	priceStructs "github.com/yekta/banano-price-service/prices/structs"
+	prices "github.com/yekta/banano-price-service/prices"
 )
 
-var prices priceStructs.SPrices
-
 func main() {
-	MEDIUM_SECRET := GetEnv("MEDIUM_SECRET")
-	MEDIUM_USER_ID := GetEnv("MEDIUM_USER_ID")
-	GHOST_TO_MEDIUM_SECRET := GetEnv("GHOST_TO_MEDIUM_SECRET")
-	TYPESENSE_ADMIN_API_KEY := GetEnv("TYPESENSE_ADMIN_API_KEY")
-	GHOST_API_KEY := GetEnv("GHOST_API_KEY")
-
 	serverPort := flag.Int("port", 3000, "Port to listen on")
 
 	app := fiber.New()
@@ -32,68 +20,23 @@ func main() {
 	app.Use(cors)
 
 	cron := cron.New()
-	cron.AddFunc("@every 15s", GetAndSetPrices)
+	cron.AddFunc("@every 15s", prices.GetAndSetPrices)
 	cron.Start()
 
-	go GetAndSetPrices()
-	go blog.HandleTypesense(TYPESENSE_ADMIN_API_KEY, GHOST_API_KEY)
+	go prices.GetAndSetPrices()
+	go blog.IndexTypesense()
 
 	app.Get("/prices", func(c *fiber.Ctx) error {
-		return c.JSON(prices)
+		return prices.PricesHandler(c)
 	})
 
 	app.Post("/blog", func(c *fiber.Ctx) error {
-		return blog.BlogHandler(c, MEDIUM_SECRET, MEDIUM_USER_ID, GHOST_TO_MEDIUM_SECRET, TYPESENSE_ADMIN_API_KEY, GHOST_API_KEY)
+		return blog.BlogHandler(c)
 	})
 
 	app.Get("/typesense-reindex", func(c *fiber.Ctx) error {
-		return blog.TypesenseReindexHandler(c, TYPESENSE_ADMIN_API_KEY, GHOST_API_KEY)
+		return blog.TypesenseReindexHandler(c)
 	})
 
 	log.Fatal(app.Listen(fmt.Sprintf(":%d", *serverPort)))
-}
-
-func GetAndSetPrices() {
-	res := GetPrices()
-	prices = res
-}
-
-func GetPrices() priceStructs.SPrices {
-	log.Println("Getting prices...")
-
-	var res priceStructs.SPrices
-
-	c1 := make(chan priceStructs.SPriceSet)
-	c2 := make(chan priceStructs.SPriceSet)
-
-	go func() {
-		c1 <- priceSources.GetCoinGecko()
-		defer close(c1)
-	}()
-
-	go func() {
-		c2 <- priceSources.GetCoinex()
-		defer close(c2)
-	}()
-
-	res.CoinGecko = <-c1
-	res.Coinex = <-c2
-	res.Main = res.Coinex
-	return res
-}
-
-func PrettyPrint(v interface{}) (err error) {
-	b, err := json.MarshalIndent(v, "", "  ")
-	if err == nil {
-		fmt.Println(string(b))
-	}
-	return
-}
-
-func GetEnv(key string) string {
-	err := godotenv.Load(".env")
-	if err != nil {
-		log.Println("\nNo .env file, will try to use env variables...")
-	}
-	return os.Getenv(key)
 }
