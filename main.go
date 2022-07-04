@@ -26,17 +26,10 @@ func main() {
 	go prices.GetAndSetPrices()
 	go blog.IndexTypesense()
 
-	app.Get("/prices", func(c *fiber.Ctx) error {
-		return prices.PricesHandler(c)
-	})
+	app.Get("/prices", prices.PricesHandler)
 
-	app.Post("/blog/ghost-to-medium", func(c *fiber.Ctx) error {
-		return blog.GhostToMediumHandler(c)
-	})
-
-	app.Get("/blog/typesense-reindex", func(c *fiber.Ctx) error {
-		return blog.TypesenseReindexHandler(c)
-	})
+	app.Post("/blog/ghost-to-medium", blog.GhostToMediumHandler)
+	app.Get("/blog/typesense-reindex", blog.TypesenseReindexHandler)
 
 	log.Fatal(app.Listen(fmt.Sprintf(":%d", *serverPort)))
 }
