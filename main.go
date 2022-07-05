@@ -31,7 +31,7 @@ func main() {
 	app.Get("/prices", prices.PricesHandler)
 
 	app.Post("/blog/ghost-to-medium", blog.GhostToMediumHandler)
-	app.Get("/blog/typesense-reindex", blog.TypesenseReindexHandler)
+	app.Get("/blog/typesense-index", blog.TypesenseIndexHandler)
 	app.Get("/blog/posts-for-sitemap", blog.BlogPostsForSitemapHandler)
 
 	log.Fatal(app.Listen(fmt.Sprintf(":%d", *serverPort)))

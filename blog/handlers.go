@@ -90,21 +90,20 @@ func GhostToMediumHandler(c *fiber.Ctx) error {
 	log.Printf(`Submitted the post to Medium with the title "%s"...`, post.Title)
 	lastPostToMedium = time.Now()
 
-	// Typesense stuff
 	IndexTypesense()
 
 	return c.JSON(r)
 }
 
-func TypesenseReindexHandler(c *fiber.Ctx) error {
+func TypesenseIndexHandler(c *fiber.Ctx) error {
 	key := c.Query("key")
 	if key != GHOST_TO_MEDIUM_SECRET {
-		log.Println("TypesenseReindexHandler: Not authorized")
+		log.Println("TypesenseIndexHandler: Not authorized")
 		return c.Status(http.StatusUnauthorized).SendString("Not authorized")
 	}
-	log.Println("TypesenseReindexHandler: Triggered...")
+	log.Println("TypesenseIndexHandler: Triggered...")
 	IndexTypesense()
-	log.Println("TypesenseReindexHandler finished executing...")
+	log.Println("TypesenseIndexHandler finished executing...")
 	return c.JSON("ok")
 }
 
