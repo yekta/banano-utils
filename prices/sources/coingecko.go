@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
-	
+
 	"github.com/yekta/banano-price-service/prices/structs"
 )
 
@@ -16,13 +16,13 @@ func GetCoinGecko() priceStructs.SPriceSet {
 	}
 	var resultCoinGecko priceStructs.SCoinGeckoResponse
 	json.NewDecoder(respCoinGecko.Body).Decode(&resultCoinGecko)
-	
+
 	priceSet := priceStructs.SPriceSet{
 		USD: resultCoinGecko.Banano.USD,
 		BTC: resultCoinGecko.Banano.BTC,
 	}
 
-	log.Println("CoinGecko done")
+	log.Println("Prices: CoinGecko done...")
 
 	return priceSet
 }

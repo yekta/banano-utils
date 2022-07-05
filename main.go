@@ -21,15 +21,18 @@ func main() {
 
 	cron := cron.New()
 	cron.AddFunc("@every 15s", prices.GetAndSetPrices)
+	cron.AddFunc("@every 10m", blog.GetAndSetBlogPostsForSitemap)
 	cron.Start()
 
 	go prices.GetAndSetPrices()
 	go blog.IndexTypesense()
+	go blog.GetAndSetBlogPostsForSitemap()
 
 	app.Get("/prices", prices.PricesHandler)
 
 	app.Post("/blog/ghost-to-medium", blog.GhostToMediumHandler)
 	app.Get("/blog/typesense-reindex", blog.TypesenseReindexHandler)
+	app.Get("/blog/posts-for-sitemap", blog.BlogPostsForSitemapHandler)
 
 	log.Fatal(app.Listen(fmt.Sprintf(":%d", *serverPort)))
 }

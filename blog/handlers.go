@@ -21,6 +21,8 @@ var GHOST_API_KEY = sharedUtils.GetEnv("GHOST_API_KEY")
 var GHOST_TO_MEDIUM_SECRET = sharedUtils.GetEnv("GHOST_TO_MEDIUM_SECRET")
 var MEDIUM_SECRET = sharedUtils.GetEnv("MEDIUM_SECRET")
 var MEDIUM_USER_ID = sharedUtils.GetEnv("MEDIUM_USER_ID")
+var blogApiUrl = "https://ghost.banano.cc/ghost/api/content"
+var blogPostsForSitemap []blogStructs.SGhostPostForSitemap
 
 const secondThreshold = 60
 
@@ -37,7 +39,7 @@ func GhostToMediumHandler(c *fiber.Ctx) error {
 		return c.Status(http.StatusTooManyRequests).SendString("Too many requests")
 	}
 
-	log.Println("GhostToMediumHandler triggered...")
+	log.Println("GhostToMediumHandler: Triggered...")
 
 	var payload blogStructs.SGhostPostWebhook
 	if err := c.BodyParser(&payload); err != nil {
@@ -75,7 +77,8 @@ func GhostToMediumHandler(c *fiber.Ctx) error {
 	req.Header.Add("Content-Type", "application/json")
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
-		return fmt.Errorf("Got error %s", err.Error())
+		log.Printf("Got error: %s", err)
+		return c.Status(http.StatusInternalServerError).SendString("Something went wrong")
 	}
 	json.NewDecoder(resp.Body).Decode(&resp)
 
@@ -93,8 +96,24 @@ func GhostToMediumHandler(c *fiber.Ctx) error {
 	return c.JSON(r)
 }
 
+func TypesenseReindexHandler(c *fiber.Ctx) error {
+	key := c.Query("key")
+	if key != GHOST_TO_MEDIUM_SECRET {
+		log.Println("TypesenseReindexHandler: Not authorized")
+		return c.Status(http.StatusUnauthorized).SendString("Not authorized")
+	}
+	log.Println("TypesenseReindexHandler: Triggered...")
+	IndexTypesense()
+	log.Println("TypesenseReindexHandler finished executing...")
+	return c.JSON("ok")
+}
+
+func BlogPostsForSitemapHandler(c *fiber.Ctx) error {
+	log.Println("BlogPostsForSitemapHandler: Triggered...")
+	return c.JSON(blogPostsForSitemap)
+}
+
 func IndexTypesense() error {
-	// Typesense stuff starts here
 	fields := [...]string{
 		"id",
 		"title",
@@ -106,7 +125,6 @@ func IndexTypesense() error {
 	}
 	formats := [...]string{"mobiledoc", "html", "plaintext"}
 	include := [...]string{"tags"}
-	blogApiUrl := "https://ghost.banano.cc/ghost/api/content"
 	fieldsStr := strings.Join(fields[:], ",")
 	formatsStr := strings.Join(formats[:], ",")
 	includeStr := strings.Join(include[:], ",")
@@ -117,10 +135,10 @@ func IndexTypesense() error {
 	if err != nil {
 		return fmt.Errorf("Got error %s", err.Error())
 	}
-	var ghostPosts blogStructs.SGhostPostsRepsonse
+	var ghostPosts blogStructs.SGhostPostsResponse
 	json.NewDecoder(resp.Body).Decode(&ghostPosts)
 
-	log.Println("TypesenseHandler: Got Ghost blog posts...")
+	log.Println("TypesenseHandler: Got Ghost blog posts!")
 
 	var blogPostsForTypesense []interface{}
 	for _, post := range ghostPosts.Posts {
@@ -210,16 +228,25 @@ func IndexTypesense() error {
 	return errImport
 }
 
-func TypesenseReindexHandler(c *fiber.Ctx) error {
-	key := c.Query("key")
-	if key != GHOST_TO_MEDIUM_SECRET {
-		log.Println("TypesenseReindexHandler: Not authorized")
-		return c.Status(http.StatusUnauthorized).SendString("Not authorized")
+func GetAndSetBlogPostsForSitemap() {
+	log.Println("BlogPostsForSitemap: Getting...")
+	fields := [...]string{
+		"slug",
+		"updated_at",
 	}
-	log.Println("TypesenseReindexHandler triggered...")
-	IndexTypesense()
-	log.Println("TypesenseReindexHandler finished executing...")
-	return c.JSON("ok")
+	fieldsStr := strings.Join(fields[:], ",")
+	const limit = 1000
+	blogEndpoint := fmt.Sprintf(`%s/posts?key=%s&fields=%s&limit=%v`, blogApiUrl, GHOST_API_KEY, fieldsStr, limit)
+	resp, err := http.Get(blogEndpoint)
+	if err != nil {
+		log.Printf("Got error: %s", err)
+	} else {
+		log.Println("BlogPostsForSitemap: Got it!")
+		var ghostPosts blogStructs.SGhostPostsForSitemapResponse
+		json.NewDecoder(resp.Body).Decode(&ghostPosts)
+		blogPostsForSitemap = ghostPosts.Posts
+		log.Println("BlogPostsForSitemap: Set!")
+	}
 }
 
 func GhostToMediumHtmlConverter(html string, title string) string {

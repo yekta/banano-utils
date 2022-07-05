@@ -20,7 +20,7 @@ func GetAndSetPrices() {
 }
 
 func GetPrices() priceStructs.SPrices {
-	log.Println("Getting prices...")
+	log.Println("Prices: Getting...")
 
 	var res priceStructs.SPrices
 
@@ -40,5 +40,6 @@ func GetPrices() priceStructs.SPrices {
 	res.CoinGecko = <-c1
 	res.Coinex = <-c2
 	res.Main = res.Coinex
+	log.Println("Prices: Got it!")
 	return res
 }

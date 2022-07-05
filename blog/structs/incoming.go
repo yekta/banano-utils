@@ -23,7 +23,7 @@ type SGhostPostTag struct {
 	Slug string `json:"slug"`
 }
 
-type SGhostPostsRepsonse struct {
+type SGhostPostsResponse struct {
 	Posts []SGhostPost `json:"posts"`
 }
 
@@ -39,4 +39,13 @@ type SGhostPost struct {
 	Html          string          `json:"html"`
 	Mobiledoc     string          `json:"mobiledoc"`
 	Plaintext     string          `json:"plaintext"`
+}
+
+type SGhostPostsForSitemapResponse struct {
+	Posts []SGhostPostForSitemap `json:"posts"`
+}
+
+type SGhostPostForSitemap struct {
+	Slug      string `json:"slug"`
+	UpdatedAt string `json:"updated_at"`
 }
