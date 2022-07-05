@@ -22,7 +22,7 @@ var GHOST_TO_MEDIUM_SECRET = sharedUtils.GetEnv("GHOST_TO_MEDIUM_SECRET")
 var MEDIUM_SECRET = sharedUtils.GetEnv("MEDIUM_SECRET")
 var MEDIUM_USER_ID = sharedUtils.GetEnv("MEDIUM_USER_ID")
 var blogApiUrl = "https://ghost.banano.cc/ghost/api/content"
-var blogPostsForSitemap []blogStructs.SGhostPostForSitemap
+var blogPostsForSitemap blogStructs.SGhostPostsForSitemapResponse
 
 const secondThreshold = 60
 
@@ -244,7 +244,7 @@ func GetAndSetBlogPostsForSitemap() {
 		log.Println("BlogPostsForSitemap: Got it!")
 		var ghostPosts blogStructs.SGhostPostsForSitemapResponse
 		json.NewDecoder(resp.Body).Decode(&ghostPosts)
-		blogPostsForSitemap = ghostPosts.Posts
+		blogPostsForSitemap = ghostPosts
 		log.Println("BlogPostsForSitemap: Set!")
 	}
 }
