@@ -24,6 +24,68 @@ var MEDIUM_USER_ID = sharedUtils.GetEnv("MEDIUM_USER_ID")
 var blogApiUrl = "https://ghost.banano.cc/ghost/api/content"
 var blogPostsForSitemap blogStructs.SGhostPostsForSitemapResponse
 
+var fields = [...]string{
+	"id",
+	"title",
+	"slug",
+	"published_at",
+	"excerpt",
+	"custom_excerpt",
+	"feature_image",
+}
+var formats = [...]string{"mobiledoc", "html", "plaintext"}
+var include = [...]string{"tags"}
+var fieldsStr = strings.Join(fields[:], ",")
+var formatsStr = strings.Join(formats[:], ",")
+var includeStr = strings.Join(include[:], ",")
+var limit = 1000
+var blogEndpoint = fmt.Sprintf(`%s/posts?key=%s&fields=%s&formats=%s&include=%s&limit=%v`, blogApiUrl, GHOST_API_KEY, fieldsStr, formatsStr, includeStr, limit)
+var typesenseClient = typesense.NewClient(
+	typesense.WithServer("https://typesense.banano.cc"),
+	typesense.WithAPIKey(TYPESENSE_ADMIN_API_KEY),
+	typesense.WithConnectionTimeout(60*time.Second))
+var typesenseParams = &api.ImportDocumentsParams{
+	Action:    action(),
+	BatchSize: batchSize(),
+}
+var schema = &api.CollectionSchema{
+	Name: "blog-posts",
+	Fields: []api.Field{
+		{
+			Name:  "title",
+			Type:  "string",
+			Infix: newTrue(),
+		},
+		{
+			Name: "excerpt",
+			Type: "string",
+		},
+		{
+			Name: "slug",
+			Type: "string",
+		},
+		{
+			Name: "published_at",
+			Type: "int64",
+		},
+		{
+			Name:     "custom_excerpt",
+			Type:     "string",
+			Optional: newTrue(),
+		},
+		{
+			Name: "plaintext",
+			Type: "string",
+		},
+		{
+			Name:     "feature_image",
+			Type:     "string",
+			Optional: newTrue(),
+		},
+	},
+	DefaultSortingField: defaultSortingField(),
+}
+
 const secondThreshold = 60
 
 var lastPostToMedium = time.Now().Add(time.Second * -1 * secondThreshold)
@@ -113,27 +175,11 @@ func BlogPostsForSitemapHandler(c *fiber.Ctx) error {
 }
 
 func IndexTypesense() error {
-	fields := [...]string{
-		"id",
-		"title",
-		"slug",
-		"published_at",
-		"excerpt",
-		"custom_excerpt",
-		"feature_image",
-	}
-	formats := [...]string{"mobiledoc", "html", "plaintext"}
-	include := [...]string{"tags"}
-	fieldsStr := strings.Join(fields[:], ",")
-	formatsStr := strings.Join(formats[:], ",")
-	includeStr := strings.Join(include[:], ",")
-	const limit = 1000
-	blogEndpoint := fmt.Sprintf(`%s/posts?key=%s&fields=%s&formats=%s&include=%s&limit=%v`, blogApiUrl, GHOST_API_KEY, fieldsStr, formatsStr, includeStr, limit)
-
 	resp, err := http.Get(blogEndpoint)
 	if err != nil {
 		return fmt.Errorf("Got error %s", err.Error())
 	}
+
 	var ghostPosts blogStructs.SGhostPostsResponse
 	json.NewDecoder(resp.Body).Decode(&ghostPosts)
 
@@ -154,55 +200,12 @@ func IndexTypesense() error {
 		})
 	}
 
-	typesenseClient := typesense.NewClient(
-		typesense.WithServer("https://typesense.banano.cc"),
-		typesense.WithAPIKey(TYPESENSE_ADMIN_API_KEY),
-		typesense.WithConnectionTimeout(60*time.Second))
-
 	_, errDel := typesenseClient.Collection("blog-posts").Delete()
 
 	if errDel != nil {
 		log.Println("TypesenseHandler: Error deleting collection:", errDel)
 	} else {
 		log.Println("TypesenseHandler: Typesense collection deleted...")
-	}
-
-	schema := &api.CollectionSchema{
-		Name: "blog-posts",
-		Fields: []api.Field{
-			{
-				Name:  "title",
-				Type:  "string",
-				Infix: newTrue(),
-			},
-			{
-				Name: "excerpt",
-				Type: "string",
-			},
-			{
-				Name: "slug",
-				Type: "string",
-			},
-			{
-				Name: "published_at",
-				Type: "int64",
-			},
-			{
-				Name:     "custom_excerpt",
-				Type:     "string",
-				Optional: newTrue(),
-			},
-			{
-				Name: "plaintext",
-				Type: "string",
-			},
-			{
-				Name:     "feature_image",
-				Type:     "string",
-				Optional: newTrue(),
-			},
-		},
-		DefaultSortingField: defaultSortingField(),
 	}
 
 	_, errCreate := typesenseClient.Collections().Create(schema)
@@ -212,12 +215,7 @@ func IndexTypesense() error {
 		log.Println("TypesenseHandler: New Typesense collection created...")
 	}
 
-	params := &api.ImportDocumentsParams{
-		Action:    action(),
-		BatchSize: batchSize(),
-	}
-
-	_, errImport := typesenseClient.Collection("blog-posts").Documents().Import(blogPostsForTypesense, params)
+	_, errImport := typesenseClient.Collection("blog-posts").Documents().Import(blogPostsForTypesense, typesenseParams)
 
 	if errImport != nil {
 		log.Printf("Got error %s", errImport)
