@@ -37,7 +37,6 @@ type SGhostPost struct {
 	FeatureImage  string          `json:"feature_image"`
 	Tags          []SGhostPostTag `json:"tags"`
 	Html          string          `json:"html"`
-	Mobiledoc     string          `json:"mobiledoc"`
 	Plaintext     string          `json:"plaintext"`
 }
 

@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"strconv"
 	"strings"
 	"time"
 
@@ -23,6 +24,7 @@ var MEDIUM_SECRET = sharedUtils.GetEnv("MEDIUM_SECRET")
 var MEDIUM_USER_ID = sharedUtils.GetEnv("MEDIUM_USER_ID")
 var blogApiUrl = "https://ghost.banano.cc/ghost/api/content"
 var blogPostsForSitemap blogStructs.SGhostPostsForSitemapResponse
+var blogPosts blogStructs.SGhostPostsResponse
 
 var fields = [...]string{
 	"id",
@@ -172,6 +174,43 @@ func TypesenseIndexHandler(c *fiber.Ctx) error {
 func BlogPostsForSitemapHandler(c *fiber.Ctx) error {
 	log.Println("BlogPostsForSitemapHandler: Triggered...")
 	return c.JSON(blogPostsForSitemap)
+}
+
+func BlogPostsHandler(c *fiber.Ctx) error {
+	log.Println("BlogPostsHandler: Triggered...")
+
+	const defaultLimit = 15
+	finalPosts := blogPosts
+
+	limit := c.Query("limit")
+	limitInt, err := strconv.Atoi(limit)
+	if err != nil {
+		limitInt = defaultLimit
+	}
+	if limitInt > len(blogPosts.Posts) {
+		limitInt = len(blogPosts.Posts)
+	}
+
+	finalPosts.Posts = blogPosts.Posts[:limitInt]
+
+	return c.JSON(finalPosts)
+}
+
+func GetAndSetBlogPosts() error {
+	log.Println("GetAndSetBlogPosts: Getting...")
+
+	resp, err := http.Get(blogEndpoint)
+	if err != nil {
+		return fmt.Errorf("Got error %s", err.Error())
+	}
+
+	var ghostPosts blogStructs.SGhostPostsResponse
+	json.NewDecoder(resp.Body).Decode(&ghostPosts)
+
+	blogPosts = ghostPosts
+
+	log.Println("GetAndSetBlogPosts: Set!")
+	return err
 }
 
 func IndexTypesense() error {
