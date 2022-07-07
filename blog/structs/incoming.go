@@ -28,16 +28,16 @@ type SGhostPostsResponse struct {
 }
 
 type SGhostPost struct {
-	Id            string          `json:"id"`
-	Title         string          `json:"title"`
-	Slug          string          `json:"slug"`
-	PublishedAt   string          `json:"published_at"`
-	Excerpt       string          `json:"excerpt"`
-	CustomExcerpt string          `json:"custom_excerpt"`
-	FeatureImage  string          `json:"feature_image"`
-	Tags          []SGhostPostTag `json:"tags"`
-	Html          string          `json:"html"`
-	Plaintext     string          `json:"plaintext"`
+	Id            string          `json:"id,omitempty"`
+	Title         string          `json:"title,omitempty"`
+	Slug          string          `json:"slug,omitempty"`
+	PublishedAt   string          `json:"published_at,omitempty"`
+	Excerpt       string          `json:"excerpt,omitempty"`
+	CustomExcerpt string          `json:"custom_excerpt,omitempty"`
+	FeatureImage  string          `json:"feature_image,omitempty"`
+	Tags          []SGhostPostTag `json:"tags,omitempty"`
+	Html          string          `json:"html,omitempty"`
+	Plaintext     string          `json:"plaintext,omitempty"`
 }
 
 type SGhostPostsForSitemapResponse struct {

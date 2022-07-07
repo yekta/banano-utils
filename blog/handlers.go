@@ -15,6 +15,7 @@ import (
 	"github.com/typesense/typesense-go/typesense/api"
 	blogStructs "github.com/yekta/banano-price-service/blog/structs"
 	sharedUtils "github.com/yekta/banano-price-service/shared"
+	"golang.org/x/exp/slices"
 )
 
 var TYPESENSE_ADMIN_API_KEY = sharedUtils.GetEnv("TYPESENSE_ADMIN_API_KEY")
@@ -41,7 +42,7 @@ var fieldsStr = strings.Join(fields[:], ",")
 var formatsStr = strings.Join(formats[:], ",")
 var includeStr = strings.Join(include[:], ",")
 var limit = 1000
-var blogEndpoint = fmt.Sprintf(`%s/posts?key=%s&fields=%s&formats=%s&include=%s&limit=%v`, blogApiUrl, GHOST_API_KEY, fieldsStr, formatsStr, includeStr, limit)
+var blogEndpoint = fmt.Sprintf(`%s/posts/?key=%s&fields=%s&formats=%s&include=%s&limit=%v`, blogApiUrl, GHOST_API_KEY, fieldsStr, formatsStr, includeStr, limit)
 var typesenseClient = typesense.NewClient(
 	typesense.WithServer("https://typesense.banano.cc"),
 	typesense.WithAPIKey(TYPESENSE_ADMIN_API_KEY),
@@ -180,7 +181,7 @@ func BlogPostsHandler(c *fiber.Ctx) error {
 	log.Println("BlogPostsHandler: Triggered...")
 
 	const defaultLimit = 15
-	posts := blogPosts
+	var postsRes blogStructs.SGhostPostsResponse
 
 	limit := c.Query("limit")
 	limitInt, err := strconv.Atoi(limit)
@@ -191,15 +192,51 @@ func BlogPostsHandler(c *fiber.Ctx) error {
 		limitInt = len(blogPosts.Posts)
 	}
 
-	posts.Posts = blogPosts.Posts[:limitInt]
+	postsRes.Posts = []blogStructs.SGhostPost{}
+	postsRes.Posts = append(postsRes.Posts, blogPosts.Posts[:limitInt]...)
 
 	fieldsStr := c.Query("fields")
 	if fieldsStr != "" {
 		fields := strings.Split(fieldsStr, ",")
-		log.Println(fields)
+		for index, post := range postsRes.Posts {
+			if !slices.Contains(fields, "id") {
+				post.Id = ""
+			}
+			if !slices.Contains(fields, "slug") {
+				post.Slug = ""
+			}
+			if !slices.Contains(fields, "title") {
+				post.Title = ""
+			}
+			if !slices.Contains(fields, "published_at") {
+				post.PublishedAt = ""
+			}
+			if !slices.Contains(fields, "excerpt") {
+				post.Excerpt = ""
+			}
+			if !slices.Contains(fields, "custom_excerpt") {
+				post.CustomExcerpt = ""
+			}
+			if !slices.Contains(fields, "html") {
+				post.Html = ""
+			}
+			if !slices.Contains(fields, "plaintext") {
+				post.Plaintext = ""
+			}
+			if !slices.Contains(fields, "slug") {
+				post.Slug = ""
+			}
+			if !slices.Contains(fields, "feature_image") {
+				post.FeatureImage = ""
+			}
+			if !slices.Contains(fields, "tags") {
+				post.Tags = []blogStructs.SGhostPostTag{}
+			}
+			postsRes.Posts[index] = post
+		}
 	}
 
-	return c.JSON(posts)
+	return c.JSON(postsRes)
 }
 
 func GetAndSetBlogPosts() error {
@@ -278,7 +315,7 @@ func GetAndSetBlogPostsForSitemap() {
 	}
 	fieldsStr := strings.Join(fields[:], ",")
 	const limit = 1000
-	blogEndpoint := fmt.Sprintf(`%s/posts?key=%s&fields=%s&limit=%v`, blogApiUrl, GHOST_API_KEY, fieldsStr, limit)
+	blogEndpoint := fmt.Sprintf(`%s/posts/?key=%s&fields=%s&limit=%v`, blogApiUrl, GHOST_API_KEY, fieldsStr, limit)
 	resp, err := http.Get(blogEndpoint)
 	if err != nil {
 		log.Printf("Got error: %s", err)
