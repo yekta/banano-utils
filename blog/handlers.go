@@ -180,7 +180,7 @@ func BlogPostsHandler(c *fiber.Ctx) error {
 	log.Println("BlogPostsHandler: Triggered...")
 
 	const defaultLimit = 15
-	finalPosts := blogPosts
+	posts := blogPosts
 
 	limit := c.Query("limit")
 	limitInt, err := strconv.Atoi(limit)
@@ -191,9 +191,15 @@ func BlogPostsHandler(c *fiber.Ctx) error {
 		limitInt = len(blogPosts.Posts)
 	}
 
-	finalPosts.Posts = blogPosts.Posts[:limitInt]
+	posts.Posts = blogPosts.Posts[:limitInt]
 
-	return c.JSON(finalPosts)
+	fieldsStr := c.Query("fields")
+	if fieldsStr != "" {
+		fields := strings.Split(fieldsStr, ",")
+		log.Println(fields)
+	}
+
+	return c.JSON(posts)
 }
 
 func GetAndSetBlogPosts() error {
