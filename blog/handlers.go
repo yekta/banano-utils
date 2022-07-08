@@ -184,6 +184,7 @@ func BlogPostHandler(c *fiber.Ctx) error {
 		log.Println("BlogPostHandler: Not authorized")
 		return c.Status(http.StatusUnauthorized).SendString("Not authorized")
 	}
+
 	slug := c.Params("slug")
 	log.Printf(`BlogPostHandler: Triggered for "%s"`, slug)
 	post, ok := blogSlugToPost[slug]
