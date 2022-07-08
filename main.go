@@ -27,12 +27,15 @@ func main() {
 	go prices.GetAndSetPrices()
 	go blog.IndexTypesense()
 	go blog.GetAndSetBlogPostsForSitemap()
+	go blog.GetAndSetBlogPosts()
 
 	app.Get("/prices", prices.PricesHandler)
 
 	app.Post("/blog/ghost-to-medium", blog.GhostToMediumHandler)
 	app.Get("/blog/typesense-index", blog.TypesenseIndexHandler)
 	app.Get("/blog/posts-for-sitemap", blog.BlogPostsForSitemapHandler)
+	app.Get("/blog/posts", blog.BlogPostsHandler)
+	app.Get("/blog/posts/slug/:slug", blog.BlogPostHandler)
 
 	log.Fatal(app.Listen(fmt.Sprintf(":%d", *serverPort)))
 }

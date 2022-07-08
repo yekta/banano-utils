@@ -26,6 +26,7 @@ var MEDIUM_USER_ID = sharedUtils.GetEnv("MEDIUM_USER_ID")
 var blogApiUrl = "https://ghost.banano.cc/ghost/api/content"
 var blogPostsForSitemap blogStructs.SGhostPostsForSitemapResponse
 var blogPosts blogStructs.SGhostPostsResponse
+var blogSlugToPost = make(map[string]blogStructs.SGhostPost)
 
 var fields = [...]string{
 	"id",
@@ -177,6 +178,16 @@ func BlogPostsForSitemapHandler(c *fiber.Ctx) error {
 	return c.JSON(blogPostsForSitemap)
 }
 
+func BlogPostHandler(c *fiber.Ctx) error {
+	slug := c.Params("slug")
+	log.Printf(`BlogPostHandler: Triggered for "%s"`, slug)
+	post, ok := blogSlugToPost[slug]
+	if ok {
+		return c.JSON(post)
+	}
+	return c.Status(http.StatusNotFound).SendString("Not found")
+}
+
 func BlogPostsHandler(c *fiber.Ctx) error {
 	log.Println("BlogPostsHandler: Triggered...")
 
@@ -251,6 +262,10 @@ func GetAndSetBlogPosts() error {
 	json.NewDecoder(resp.Body).Decode(&ghostPosts)
 
 	blogPosts = ghostPosts
+
+	for _, post := range blogPosts.Posts {
+		blogSlugToPost[post.Slug] = post
+	}
 
 	log.Println("GetAndSetBlogPosts: Set!")
 	return err
