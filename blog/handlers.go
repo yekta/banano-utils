@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"math"
 	"net/http"
 	"strconv"
 	"strings"
@@ -52,6 +53,9 @@ var typesenseParams = &api.ImportDocumentsParams{
 	Action:    action(),
 	BatchSize: batchSize(),
 }
+
+const defaultPostLimit = 15
+
 var schema = &api.CollectionSchema{
 	Name: "blog-posts",
 	Fields: []api.Field{
@@ -153,6 +157,7 @@ func GhostToMediumHandler(c *fiber.Ctx) error {
 			Title: post.Title,
 		},
 	}
+
 	log.Printf(`Submitted the post to Medium with the title "%s"...`, post.Title)
 	lastPostToMedium = time.Now()
 
@@ -188,10 +193,18 @@ func BlogPostHandler(c *fiber.Ctx) error {
 	slug := c.Params("slug")
 	log.Printf(`BlogPostHandler: Triggered for "%s"`, slug)
 	post, ok := blogSlugToPost[slug]
-	if ok {
-		return c.JSON(post)
+
+	if !ok {
+		return c.Status(http.StatusNotFound).SendString("Not found")
 	}
-	return c.Status(http.StatusNotFound).SendString("Not found")
+
+	fieldsStr := c.Query("fields")
+	if fieldsStr != "" {
+		fields := strings.Split(fieldsStr, ",")
+		post = filterByFields(post, fields)
+	}
+
+	return c.JSON(post)
 }
 
 func BlogPostsHandler(c *fiber.Ctx) error {
@@ -203,63 +216,102 @@ func BlogPostsHandler(c *fiber.Ctx) error {
 
 	log.Println("BlogPostsHandler: Triggered...")
 
-	const defaultLimit = 15
 	var postsRes blogStructs.SGhostPostsResponse
+
+	page := c.Query("page")
+	pageInt, err := strconv.Atoi(page)
+	if err != nil {
+		pageInt = 1
+	}
 
 	limit := c.Query("limit")
 	limitInt, err := strconv.Atoi(limit)
 	if err != nil {
-		limitInt = defaultLimit
+		limitInt = defaultPostLimit
 	}
 	if limitInt > len(blogPosts.Posts) {
 		limitInt = len(blogPosts.Posts)
 	}
 
+	pages := int(math.Ceil(float64(len(blogPosts.Posts)) / float64(limitInt)))
+	total := len(blogPosts.Posts)
+	if pageInt < 1 {
+		pageInt = 1
+	} else if pageInt > pages {
+		pageInt = pages
+	}
+	next := pageInt + 1
+	if next > pages {
+		next = 0
+	}
+	prev := pageInt - 1
+	if prev < 1 {
+		prev = 0
+	}
 	postsRes.Posts = []blogStructs.SGhostPost{}
-	postsRes.Posts = append(postsRes.Posts, blogPosts.Posts[:limitInt]...)
+	min := (pageInt - 1) * limitInt
+	max := pageInt * limitInt
+	if max > total {
+		max = total
+	}
+	postsRes.Posts = append(postsRes.Posts, blogPosts.Posts[min:max]...)
+	postsRes.Meta = blogStructs.SGhostMeta{
+		Pagination: blogStructs.SGhostPagination{
+			Page:  pageInt,
+			Pages: pages,
+			Limit: limitInt,
+			Total: total,
+			Next:  next,
+			Prev:  prev,
+		},
+	}
 
 	fieldsStr := c.Query("fields")
 	if fieldsStr != "" {
 		fields := strings.Split(fieldsStr, ",")
 		for index, post := range postsRes.Posts {
-			if !slices.Contains(fields, "id") {
-				post.Id = ""
-			}
-			if !slices.Contains(fields, "slug") {
-				post.Slug = ""
-			}
-			if !slices.Contains(fields, "title") {
-				post.Title = ""
-			}
-			if !slices.Contains(fields, "published_at") {
-				post.PublishedAt = ""
-			}
-			if !slices.Contains(fields, "excerpt") {
-				post.Excerpt = ""
-			}
-			if !slices.Contains(fields, "custom_excerpt") {
-				post.CustomExcerpt = ""
-			}
-			if !slices.Contains(fields, "html") {
-				post.Html = ""
-			}
-			if !slices.Contains(fields, "plaintext") {
-				post.Plaintext = ""
-			}
-			if !slices.Contains(fields, "slug") {
-				post.Slug = ""
-			}
-			if !slices.Contains(fields, "feature_image") {
-				post.FeatureImage = ""
-			}
-			if !slices.Contains(fields, "tags") {
-				post.Tags = []blogStructs.SGhostPostTag{}
-			}
-			postsRes.Posts[index] = post
+			newPost := filterByFields(post, fields)
+			postsRes.Posts[index] = newPost
 		}
 	}
-
 	return c.JSON(postsRes)
+}
+
+func filterByFields(post blogStructs.SGhostPost, fields []string) blogStructs.SGhostPost {
+	if !slices.Contains(fields, "id") {
+		post.Id = ""
+	}
+	if !slices.Contains(fields, "slug") {
+		post.Slug = ""
+	}
+	if !slices.Contains(fields, "title") {
+		post.Title = ""
+	}
+	if !slices.Contains(fields, "published_at") {
+		post.PublishedAt = ""
+	}
+	if !slices.Contains(fields, "excerpt") {
+		post.Excerpt = ""
+	}
+	if !slices.Contains(fields, "custom_excerpt") {
+		post.CustomExcerpt = ""
+	}
+	if !slices.Contains(fields, "html") {
+		post.Html = ""
+	}
+	if !slices.Contains(fields, "plaintext") {
+		post.Plaintext = ""
+	}
+	if !slices.Contains(fields, "slug") {
+		post.Slug = ""
+	}
+	if !slices.Contains(fields, "feature_image") {
+		post.FeatureImage = ""
+	}
+	if !slices.Contains(fields, "tags") {
+		post.Tags = []blogStructs.SGhostPostTag{}
+	}
+	return post
 }
 
 func GetAndSetBlogPosts() error {

@@ -25,6 +25,7 @@ type SGhostPostTag struct {
 
 type SGhostPostsResponse struct {
 	Posts []SGhostPost `json:"posts"`
+	Meta  SGhostMeta   `json:"meta"`
 }
 
 type SGhostPost struct {
@@ -47,4 +48,17 @@ type SGhostPostsForSitemapResponse struct {
 type SGhostPostForSitemap struct {
 	Slug      string `json:"slug"`
 	UpdatedAt string `json:"updated_at"`
+}
+
+type SGhostMeta struct {
+	Pagination SGhostPagination `json:"pagination"`
+}
+
+type SGhostPagination struct {
+	Page  int `json:"page,omitempty"`
+	Pages int `json:"pages,omitempty"`
+	Limit int `json:"limit,omitempty"`
+	Total int `json:"total,omitempty"`
+	Next  int `json:"next,omitempty"`
+	Prev  int `json:"prev,omitempty"`
 }
