@@ -179,6 +179,11 @@ func BlogPostsForSitemapHandler(c *fiber.Ctx) error {
 }
 
 func BlogPostHandler(c *fiber.Ctx) error {
+	key := c.Query("key")
+	if key != GHOST_API_KEY {
+		log.Println("BlogPostHandler: Not authorized")
+		return c.Status(http.StatusUnauthorized).SendString("Not authorized")
+	}
 	slug := c.Params("slug")
 	log.Printf(`BlogPostHandler: Triggered for "%s"`, slug)
 	post, ok := blogSlugToPost[slug]
@@ -189,6 +194,12 @@ func BlogPostHandler(c *fiber.Ctx) error {
 }
 
 func BlogPostsHandler(c *fiber.Ctx) error {
+	key := c.Query("key")
+	if key != GHOST_API_KEY {
+		log.Println("BlogPostsHandler: Not authorized")
+		return c.Status(http.StatusUnauthorized).SendString("Not authorized")
+	}
+
 	log.Println("BlogPostsHandler: Triggered...")
 
 	const defaultLimit = 15
