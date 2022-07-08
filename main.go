@@ -27,7 +27,7 @@ func main() {
 	go prices.GetAndSetPrices()
 	go blog.IndexTypesense()
 	go blog.GetAndSetBlogPostsForSitemap()
-	go blog.GetAndSetBlogPosts()
+	/* go blog.GetAndSetBlogPosts() */
 
 	app.Get("/prices", prices.PricesHandler)
 	app.Post("/blog/ghost-to-medium", blog.GhostToMediumHandler)

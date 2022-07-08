@@ -33,12 +33,16 @@ var fields = [...]string{
 	"id",
 	"title",
 	"slug",
+	"created_at",
+	"updated_at",
 	"published_at",
 	"excerpt",
 	"custom_excerpt",
 	"feature_image",
+	"featured",
+	"reading_time",
 }
-var formats = [...]string{"mobiledoc", "html", "plaintext"}
+var formats = [...]string{"html", "plaintext"}
 var include = [...]string{"tags"}
 var fieldsStr = strings.Join(fields[:], ",")
 var formatsStr = strings.Join(formats[:], ",")

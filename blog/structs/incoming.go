@@ -3,6 +3,7 @@ package blogStructs
 type SGhostPostWebhook struct {
 	Post struct {
 		Current struct {
+			Id            string          `json:"id"`
 			Title         string          `json:"title"`
 			Html          string          `json:"html"`
 			FeatureImage  string          `json:"feature_image"`
@@ -11,7 +12,6 @@ type SGhostPostWebhook struct {
 			Excerpt       string          `json:"excerpt"`
 			CustomExcerpt string          `json:"custom_excerpt"`
 			Slug          string          `json:"slug"`
-			Id            string          `json:"id"`
 			Tags          []SGhostPostTag `json:"tags"`
 		} `json:"current"`
 	} `json:"post"`
@@ -32,6 +32,8 @@ type SGhostPost struct {
 	Id            string          `json:"id,omitempty"`
 	Title         string          `json:"title,omitempty"`
 	Slug          string          `json:"slug,omitempty"`
+	CreatedAt     string          `json:"created_at,omitempty"`
+	UpdatedAt     string          `json:"updated_at,omitempty"`
 	PublishedAt   string          `json:"published_at,omitempty"`
 	Excerpt       string          `json:"excerpt,omitempty"`
 	CustomExcerpt string          `json:"custom_excerpt,omitempty"`
@@ -39,6 +41,8 @@ type SGhostPost struct {
 	Tags          []SGhostPostTag `json:"tags,omitempty"`
 	Html          string          `json:"html,omitempty"`
 	Plaintext     string          `json:"plaintext,omitempty"`
+	Featured      bool            `json:"featured,omitempty"`
+	ReadingTime   int             `json:"reading_time,omitempty"`
 }
 
 type SGhostPostsForSitemapResponse struct {
