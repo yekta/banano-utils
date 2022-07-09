@@ -30,6 +30,7 @@ func GhostToMediumHandler(c *fiber.Ctx) error {
 		log.Println("GhostToMediumHandler: Too many requests, skipping")
 		return c.Status(http.StatusTooManyRequests).SendString("Too many requests")
 	}
+	lastPostToMedium = time.Now()
 
 	log.Println("GhostToMediumHandler: Triggered...")
 
@@ -81,9 +82,6 @@ func GhostToMediumHandler(c *fiber.Ctx) error {
 	}
 
 	log.Printf(`Submitted the post to Medium with the title "%s"...`, post.Title)
-	lastPostToMedium = time.Now()
-
-	IndexTypesense()
 
 	return c.JSON(r)
 }
@@ -205,8 +203,8 @@ func IndexBlogHandler(c *fiber.Ctx) error {
 		log.Println("IndexBlogHandler: Too many requests, skipping")
 		return c.Status(http.StatusTooManyRequests).SendString("Too many requests")
 	}
+	lastBlogIndex = time.Now()
 	log.Println("IndexBlogHandler: Triggered...")
 	IndexBlog()
-	lastBlogIndex = time.Now()
 	return c.Status(http.StatusOK).SendString("OK")
 }
