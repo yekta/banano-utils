@@ -29,7 +29,7 @@ func main() {
 	app.Get("/prices", prices.PricesHandler)
 	app.Get("/blog/posts", blog.BlogPostsHandler)
 	app.Get("/blog/posts/slug/:slug", blog.BlogPostHandler)
-	app.Get("/blog/index", blog.IndexBlogHandler)
+	app.Post("/blog/index", blog.IndexBlogHandler)
 	app.Post("/blog/ghost-to-medium", blog.GhostToMediumHandler)
 
 	log.Fatal(app.Listen(fmt.Sprintf(":%d", *serverPort)))
