@@ -8,17 +8,13 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
-	"time"
 
 	"github.com/gofiber/fiber/v2"
 	blogStructs "github.com/yekta/banano-price-service/blog/structs"
 )
 
-const postToMediumThresholdSeconds = 60
-const blogIndexThresholdSeconds = 30
-
-var lastPostToMedium = time.Now().Add(time.Second * -1 * postToMediumThresholdSeconds)
-var lastBlogIndex = time.Now().Add(time.Second * -1 * blogIndexThresholdSeconds)
+var lastPostToMedium = ""
+var lastBlogIndex = ""
 
 func GhostToMediumHandler(c *fiber.Ctx) error {
 	key := c.Query("key")
@@ -26,11 +22,6 @@ func GhostToMediumHandler(c *fiber.Ctx) error {
 		log.Println("GhostToMediumHandler: Not authorized")
 		return c.Status(http.StatusUnauthorized).SendString("Not authorized")
 	}
-	if lastPostToMedium.Add(time.Second * postToMediumThresholdSeconds).After(time.Now()) {
-		log.Println("GhostToMediumHandler: Too many requests, skipping")
-		return c.Status(http.StatusTooManyRequests).SendString("Too many requests")
-	}
-	lastPostToMedium = time.Now()
 
 	log.Println("GhostToMediumHandler: Triggered...")
 
@@ -38,6 +29,12 @@ func GhostToMediumHandler(c *fiber.Ctx) error {
 	if err := c.BodyParser(&payload); err != nil {
 		return err
 	}
+
+	if lastPostToMedium == payload.Post.Previous.Title+payload.Post.Previous.UpdatedAt {
+		log.Println("GhostToMediumHandler: Sent already, skipping")
+		return c.Status(http.StatusTooManyRequests).SendString("Sent already, skipping")
+	}
+	lastPostToMedium = payload.Post.Previous.Title + payload.Post.Previous.UpdatedAt
 
 	post := payload.Post.Current
 
@@ -199,12 +196,21 @@ func IndexBlogHandler(c *fiber.Ctx) error {
 		log.Println("IndexBlogHandler: Not authorized")
 		return c.Status(http.StatusUnauthorized).SendString("Not authorized")
 	}
-	if lastBlogIndex.Add(time.Second * blogIndexThresholdSeconds).After(time.Now()) {
-		log.Println("IndexBlogHandler: Too many requests, skipping")
-		return c.Status(http.StatusTooManyRequests).SendString("Too many requests")
-	}
-	lastBlogIndex = time.Now()
+
 	log.Println("IndexBlogHandler: Triggered...")
+
+	var payload blogStructs.SGhostPostWebhook
+	if err := c.BodyParser(&payload); err != nil {
+		return err
+	}
+
+	if lastBlogIndex == payload.Post.Previous.Title+payload.Post.Previous.UpdatedAt {
+		log.Println("IndexBlogHandler: Indexed already, skipping")
+		return c.Status(http.StatusTooManyRequests).SendString("Indexed already, skipping")
+	}
+	lastBlogIndex = payload.Post.Previous.Title + payload.Post.Previous.UpdatedAt
+
 	IndexBlog()
+
 	return c.Status(http.StatusOK).SendString("OK")
 }

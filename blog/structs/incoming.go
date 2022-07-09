@@ -14,6 +14,10 @@ type SGhostPostWebhook struct {
 			Slug          string          `json:"slug"`
 			Tags          []SGhostPostTag `json:"tags"`
 		} `json:"current"`
+		Previous struct {
+			Title     string `json:"title"`
+			UpdatedAt string `json:"updated_at"`
+		} `json:"previous"`
 	} `json:"post"`
 }
 
