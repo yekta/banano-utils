@@ -39,8 +39,11 @@ var include = [...]string{"tags"}
 var fieldsStr = strings.Join(fields[:], ",")
 var formatsStr = strings.Join(formats[:], ",")
 var includeStr = strings.Join(include[:], ",")
-var limit = 1000
-var similarsLimit = 3
+
+const limit = 1000
+const defaultPostLimit = 15
+const similarsLimit = 3
+
 var blogEndpoint = fmt.Sprintf(`%s/posts/?key=%s&fields=%s&formats=%s&include=%s&limit=%v`, blogApiUrl, GHOST_API_KEY, fieldsStr, formatsStr, includeStr, limit)
 var typesenseClient = typesense.NewClient(
 	typesense.WithServer("https://typesense.banano.cc"),
@@ -50,8 +53,6 @@ var typesenseParams = &api.ImportDocumentsParams{
 	Action:    action(),
 	BatchSize: batchSize(),
 }
-
-const defaultPostLimit = 15
 
 var schema = &api.CollectionSchema{
 	Name: "blog-posts",
@@ -90,5 +91,3 @@ var schema = &api.CollectionSchema{
 	},
 	DefaultSortingField: defaultSortingField(),
 }
-
-const secondThreshold = 60

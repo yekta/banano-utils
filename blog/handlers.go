@@ -14,8 +14,11 @@ import (
 	blogStructs "github.com/yekta/banano-price-service/blog/structs"
 )
 
-var lastPostToMedium = time.Now().Add(time.Second * -1 * secondThreshold)
-var lastBlogIndex = time.Now().Add(time.Second * -1 * secondThreshold)
+const postToMediumThresholdSeconds = 60
+const blogIndexThresholdSeconds = 30
+
+var lastPostToMedium = time.Now().Add(time.Second * -1 * postToMediumThresholdSeconds)
+var lastBlogIndex = time.Now().Add(time.Second * -1 * blogIndexThresholdSeconds)
 
 func GhostToMediumHandler(c *fiber.Ctx) error {
 	key := c.Query("key")
@@ -23,7 +26,7 @@ func GhostToMediumHandler(c *fiber.Ctx) error {
 		log.Println("GhostToMediumHandler: Not authorized")
 		return c.Status(http.StatusUnauthorized).SendString("Not authorized")
 	}
-	if lastPostToMedium.Add(time.Second * secondThreshold).After(time.Now()) {
+	if lastPostToMedium.Add(time.Second * postToMediumThresholdSeconds).After(time.Now()) {
 		log.Println("GhostToMediumHandler: Too many requests, skipping")
 		return c.Status(http.StatusTooManyRequests).SendString("Too many requests")
 	}
@@ -198,7 +201,7 @@ func IndexBlogHandler(c *fiber.Ctx) error {
 		log.Println("IndexBlogHandler: Not authorized")
 		return c.Status(http.StatusUnauthorized).SendString("Not authorized")
 	}
-	if lastBlogIndex.Add(time.Second * secondThreshold).After(time.Now()) {
+	if lastBlogIndex.Add(time.Second * blogIndexThresholdSeconds).After(time.Now()) {
 		log.Println("IndexBlogHandler: Too many requests, skipping")
 		return c.Status(http.StatusTooManyRequests).SendString("Too many requests")
 	}
