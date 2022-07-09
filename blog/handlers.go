@@ -171,18 +171,6 @@ func GhostToMediumHandler(c *fiber.Ctx) error {
 	return c.JSON(r)
 }
 
-func TypesenseIndexHandler(c *fiber.Ctx) error {
-	key := c.Query("key")
-	if key != GHOST_TO_MEDIUM_SECRET {
-		log.Println("TypesenseIndexHandler: Not authorized")
-		return c.Status(http.StatusUnauthorized).SendString("Not authorized")
-	}
-	log.Println("TypesenseIndexHandler: Triggered...")
-	IndexTypesense()
-	log.Println("TypesenseIndexHandler finished executing...")
-	return c.JSON("ok")
-}
-
 func BlogPostsForSitemapHandler(c *fiber.Ctx) error {
 	log.Println("BlogPostsForSitemapHandler: Triggered...")
 	return c.JSON(blogPostsForSitemap)
@@ -341,6 +329,22 @@ func filterByFields(post blogStructs.SGhostPost, fields []string) blogStructs.SG
 	return post
 }
 
+func IndexBlogHandler(c *fiber.Ctx) error {
+	key := c.Query("key")
+	if key != GHOST_TO_MEDIUM_SECRET {
+		log.Println("IndexBlogHandler: Not authorized")
+		return c.Status(http.StatusUnauthorized).SendString("Not authorized")
+	}
+	log.Println("IndexBlogHandler: Triggered...")
+	IndexBlog()
+	return c.Status(http.StatusOK).SendString("OK")
+}
+
+func IndexBlog() {
+	GetAndSetBlogPosts()
+	IndexTypesense()
+}
+
 func GetAndSetBlogPosts() error {
 	log.Println("GetAndSetBlogPosts: Getting...")
 
@@ -382,18 +386,10 @@ func GetAndSetBlogPosts() error {
 }
 
 func IndexTypesense() error {
-	resp, err := http.Get(blogEndpoint)
-	if err != nil {
-		return fmt.Errorf("Got error %s", err.Error())
-	}
-
-	var ghostPosts blogStructs.SGhostPostsResponse
-	json.NewDecoder(resp.Body).Decode(&ghostPosts)
-
-	log.Println("TypesenseHandler: Got Ghost blog posts!")
+	log.Println("TypesenseHandler: Started Indexing...")
 
 	var blogPostsForTypesense []interface{}
-	for _, post := range ghostPosts.Posts {
+	for _, post := range blogPosts.Posts {
 		t, _ := time.Parse("2006-01-02T15:04:05.000+15:04", post.PublishedAt)
 		blogPostsForTypesense = append(blogPostsForTypesense, blogStructs.SBlogPostForTypesense{
 			Id:            post.Id,
