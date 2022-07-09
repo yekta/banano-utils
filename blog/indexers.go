@@ -32,16 +32,13 @@ func GetAndSetBlogPosts() error {
 
 	for _, post := range blogPosts.Posts {
 		newPost := post
+		newPost.Similars = []blogStructs.SGhostPost{}
 		if len(newPost.Tags) < 1 {
 			continue
 		}
-		newPost.Similars = []blogStructs.SGhostPost{}
 		tagSlug := newPost.Tags[0].Slug
 		for _, otherPost := range blogPosts.Posts {
-			if otherPost.Slug == newPost.Slug {
-				continue
-			}
-			if len(otherPost.Tags) < 1 {
+			if otherPost.Slug == newPost.Slug || len(otherPost.Tags) < 1 {
 				continue
 			}
 			otherTagSlug := otherPost.Tags[0].Slug
