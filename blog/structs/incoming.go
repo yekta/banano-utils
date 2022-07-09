@@ -43,6 +43,7 @@ type SGhostPost struct {
 	Plaintext     string          `json:"plaintext,omitempty"`
 	Featured      bool            `json:"featured,omitempty"`
 	ReadingTime   int             `json:"reading_time,omitempty"`
+	Similars      []SGhostPost    `json:"similars,omitempty"`
 }
 
 type SGhostPostsForSitemapResponse struct {

@@ -48,6 +48,7 @@ var fieldsStr = strings.Join(fields[:], ",")
 var formatsStr = strings.Join(formats[:], ",")
 var includeStr = strings.Join(include[:], ",")
 var limit = 1000
+var similarsLimit = 3
 var blogEndpoint = fmt.Sprintf(`%s/posts/?key=%s&fields=%s&formats=%s&include=%s&limit=%v`, blogApiUrl, GHOST_API_KEY, fieldsStr, formatsStr, includeStr, limit)
 var typesenseClient = typesense.NewClient(
 	typesense.WithServer("https://typesense.banano.cc"),
@@ -206,6 +207,19 @@ func BlogPostHandler(c *fiber.Ctx) error {
 	if fieldsStr != "" {
 		fields := strings.Split(fieldsStr, ",")
 		post = filterByFields(post, fields)
+	} else {
+		post = blogStructs.SGhostPost{
+			Title:         post.Title,
+			Slug:          post.Slug,
+			Html:          post.Html,
+			PublishedAt:   post.PublishedAt,
+			Excerpt:       post.Excerpt,
+			CustomExcerpt: post.CustomExcerpt,
+			Tags:          post.Tags,
+			FeatureImage:  post.FeatureImage,
+			ReadingTime:   post.ReadingTime,
+			Similars:      post.Similars,
+		}
 	}
 
 	return c.JSON(post)
@@ -312,6 +326,15 @@ func filterByFields(post blogStructs.SGhostPost, fields []string) blogStructs.SG
 	if !slices.Contains(fields, "feature_image") {
 		post.FeatureImage = ""
 	}
+	if !slices.Contains(fields, "created_at") {
+		post.CreatedAt = ""
+	}
+	if !slices.Contains(fields, "updated_at") {
+		post.UpdatedAt = ""
+	}
+	if !slices.Contains(fields, "reading_time") {
+		post.ReadingTime = 0
+	}
 	if !slices.Contains(fields, "tags") {
 		post.Tags = []blogStructs.SGhostPostTag{}
 	}
@@ -332,7 +355,26 @@ func GetAndSetBlogPosts() error {
 	blogPosts = ghostPosts
 
 	for _, post := range blogPosts.Posts {
-		blogSlugToPost[post.Slug] = post
+		newPost := post
+		newPost.Similars = []blogStructs.SGhostPost{}
+		tagSlug := newPost.Tags[0].Slug
+		for _, otherPost := range blogPosts.Posts {
+			otherTagSlug := otherPost.Tags[0].Slug
+			if otherTagSlug == tagSlug && otherPost.Slug != newPost.Slug {
+				newPost.Similars = append(newPost.Similars, blogStructs.SGhostPost{
+					Title:         otherPost.Title,
+					Slug:          otherPost.Slug,
+					FeatureImage:  otherPost.FeatureImage,
+					Excerpt:       otherPost.Excerpt,
+					CustomExcerpt: otherPost.CustomExcerpt,
+					ReadingTime:   otherPost.ReadingTime,
+				})
+			}
+			if len(newPost.Similars) >= similarsLimit {
+				break
+			}
+		}
+		blogSlugToPost[newPost.Slug] = newPost
 	}
 
 	log.Println("GetAndSetBlogPosts: Set!")
