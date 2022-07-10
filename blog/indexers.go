@@ -10,9 +10,12 @@ import (
 	blogStructs "github.com/yekta/banano-price-service/blog/structs"
 )
 
-func IndexBlog() {
+func IndexBlog(initial bool) {
 	log.Println("IndexBlog: Started Indexing...")
 	GetAndSetBlogPosts()
+	if !initial {
+		TriggerDeploys()
+	}
 	IndexTypesense()
 	log.Println("IndexBlog: Finished Indexing!")
 }
@@ -104,4 +107,35 @@ func IndexTypesense() error {
 		log.Printf("TypesenseHandler: Imported documents to Typesense...")
 	}
 	return errImport
+}
+
+func TriggerDeploys() {
+	endpoints := []blogStructs.WebhookEndpoint{
+		{
+			Name: "Cloudflare Pages",
+			Url:  "https://api.cloudflare.com/client/v4/pages/webhooks/deploy_hooks/7fb014e8-6f1a-420f-89a7-919693ac5337",
+		},
+		{
+			Name: "Vercel",
+			Url:  "https://api.vercel.com/v1/integrations/deploy/prj_cR1PYJ509eWSNjFaV58m3UxODzWX/nXlojEcSZu",
+		},
+		{
+			Name: "Netlify",
+			Url:  "https://api.netlify.com/build_hooks/62caf49d858ea74e4d4dc3de",
+		},
+	}
+
+	for _, endpoint := range endpoints {
+		go TriggerDeploy(endpoint)
+	}
+}
+
+func TriggerDeploy(endpoint blogStructs.WebhookEndpoint) {
+	log.Printf("TriggerDeploy: Started for %s", endpoint.Name)
+	_, err := http.Post(endpoint.Url, "application/json", nil)
+	if err != nil {
+		log.Printf(`TriggerDeploy: Got error "%s"`, err)
+	} else {
+		log.Printf(`TriggerDeploy: Success for "%s"`, endpoint.Name)
+	}
 }

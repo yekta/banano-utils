@@ -31,3 +31,8 @@ type SBlogPostForTypesense struct {
 	FeatureImage  string `json:"feature_image"`
 	PlainText     string `json:"plaintext"`
 }
+
+type WebhookEndpoint struct {
+	Name string
+	Url  string
+}

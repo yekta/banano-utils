@@ -210,7 +210,7 @@ func IndexBlogHandler(c *fiber.Ctx) error {
 	}
 	lastBlogIndex = payload.Post.Previous.Title + payload.Post.Previous.UpdatedAt
 
-	IndexBlog()
+	IndexBlog(false)
 
 	return c.Status(http.StatusOK).SendString("OK")
 }
