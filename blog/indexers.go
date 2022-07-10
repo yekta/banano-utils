@@ -14,9 +14,9 @@ func IndexBlog(initial bool) {
 	log.Println("----- IndexBlog: Started Indexing...")
 	GetAndSetBlogPosts()
 	if !initial {
-		TriggerDeploys()
+		go TriggerDeploys()
 	}
-	IndexTypesense()
+	go IndexTypesense()
 	log.Println("----- IndexBlog: Finished Indexing!")
 }
 
@@ -141,6 +141,6 @@ func TriggerDeploy(endpoint blogStructs.WebhookEndpoint) {
 	if err != nil {
 		log.Printf(`TriggerDeploy: Got error "%s"`, err)
 	} else {
-		log.Printf(`TriggerDeploy: Success for "%s"`, endpoint.Name)
+		log.Printf(`TriggerDeploy: Success for "%s"!`, endpoint.Name)
 	}
 }
