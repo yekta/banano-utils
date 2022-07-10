@@ -22,7 +22,7 @@ func GetCoinGecko() priceStructs.SPriceSet {
 		BTC: resultCoinGecko.Banano.BTC,
 	}
 
-	log.Println("Prices: CoinGecko done...")
+	log.Println("GetPrices: CoinGecko done...")
 
 	return priceSet
 }

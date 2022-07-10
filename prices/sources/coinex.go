@@ -38,7 +38,7 @@ func GetCoinex() priceStructs.SPriceSet {
 		coinexBANBTC = s
 	}
 
-	log.Println("Prices: Coinex done...")
+	log.Println("GetPrices: Coinex done...")
 
 	return priceStructs.SPriceSet{
 		USD: coinexBANUSDT,
