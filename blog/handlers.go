@@ -23,7 +23,7 @@ func GhostToMediumHandler(c *fiber.Ctx) error {
 		return c.Status(http.StatusUnauthorized).SendString("Not authorized")
 	}
 
-	log.Println("GhostToMediumHandler: Triggered...")
+	log.Println("----- GhostToMediumHandler: Triggered...")
 
 	var payload blogStructs.SGhostPostWebhook
 	if err := c.BodyParser(&payload); err != nil {
@@ -79,7 +79,7 @@ func GhostToMediumHandler(c *fiber.Ctx) error {
 	}
 
 	log.Printf(`GhostToMediumHandler: Submitted to Medium -> "%s"...`, post.Title)
-	log.Println("GhostToMediumHandler: Finished!")
+	log.Println("----- GhostToMediumHandler: Finished!")
 
 	return c.JSON(r)
 }
@@ -92,7 +92,7 @@ func BlogPostHandler(c *fiber.Ctx) error {
 	}
 
 	slug := c.Params("slug")
-	log.Printf(`BlogPostHandler: Triggered for "%s"...`, slug)
+	log.Printf(`----- BlogPostHandler: Triggered for "%s"...`, slug)
 	post, ok := blogSlugToPost[slug]
 
 	if !ok {
@@ -118,7 +118,7 @@ func BlogPostHandler(c *fiber.Ctx) error {
 		}
 	}
 
-	log.Printf(`BlogPostHandler: Finished for "%s"!`, slug)
+	log.Printf(`----- BlogPostHandler: Finished for "%s"!`, slug)
 
 	return c.JSON(post)
 }
