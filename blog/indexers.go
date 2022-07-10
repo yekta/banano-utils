@@ -11,17 +11,17 @@ import (
 )
 
 func IndexBlog(initial bool) {
-	log.Println("IndexBlog: Started Indexing...")
+	log.Println("----- IndexBlog: Started Indexing...")
 	GetAndSetBlogPosts()
 	if !initial {
 		TriggerDeploys()
 	}
 	IndexTypesense()
-	log.Println("IndexBlog: Finished Indexing!")
+	log.Println("----- IndexBlog: Finished Indexing!")
 }
 
 func GetAndSetBlogPosts() error {
-	log.Println("GetAndSetBlogPosts: Getting...")
+	log.Println("----- GetAndSetBlogPosts: Getting...")
 
 	resp, err := http.Get(blogEndpoint)
 	if err != nil {
@@ -62,12 +62,12 @@ func GetAndSetBlogPosts() error {
 		blogSlugToPost[newPost.Slug] = newPost
 	}
 
-	log.Println("GetAndSetBlogPosts: Set!")
+	log.Println("----- GetAndSetBlogPosts: Set!")
 	return err
 }
 
 func IndexTypesense() error {
-	log.Println("TypesenseHandler: Started Indexing...")
+	log.Println("----- TypesenseHandler: Started Indexing...")
 
 	var blogPostsForTypesense []interface{}
 	for _, post := range blogPosts.Posts {
@@ -106,10 +106,13 @@ func IndexTypesense() error {
 	} else {
 		log.Printf("TypesenseHandler: Imported documents to Typesense...")
 	}
+
+	log.Println("----- TypesenseHandler: Finished Indexing...")
 	return errImport
 }
 
 func TriggerDeploys() {
+	log.Printf(`----- TriggerDeploys: Started...`)
 	endpoints := []blogStructs.WebhookEndpoint{
 		{
 			Name: "Cloudflare Pages",
@@ -128,10 +131,12 @@ func TriggerDeploys() {
 	for _, endpoint := range endpoints {
 		go TriggerDeploy(endpoint)
 	}
+
+	log.Printf(`----- TriggerDeploys: Ended!`)
 }
 
 func TriggerDeploy(endpoint blogStructs.WebhookEndpoint) {
-	log.Printf("TriggerDeploy: Started for %s", endpoint.Name)
+	log.Printf(`TriggerDeploy: Started for "%s"...`, endpoint.Name)
 	_, err := http.Post(endpoint.Url, "application/json", nil)
 	if err != nil {
 		log.Printf(`TriggerDeploy: Got error "%s"`, err)

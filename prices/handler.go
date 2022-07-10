@@ -11,16 +11,19 @@ import (
 var prices priceStructs.SPrices
 
 func PricesHandler(c *fiber.Ctx) error {
+	log.Println("----- PricesHandler: Triggered...")
 	return c.JSON(prices)
 }
 
 func GetAndSetPrices() {
+	log.Println("----- GetAndSetPrices: Started...")
 	res := GetPrices()
 	prices = res
+	log.Println("----- GetAndSetPrices: Set!")
 }
 
 func GetPrices() priceStructs.SPrices {
-	log.Println("Prices: Getting...")
+	log.Println("----- GetPrices: Getting...")
 
 	var res priceStructs.SPrices
 
@@ -40,6 +43,6 @@ func GetPrices() priceStructs.SPrices {
 	res.CoinGecko = <-c1
 	res.Coinex = <-c2
 	res.Main = res.Coinex
-	log.Println("Prices: Got it!")
+	log.Println("----- GetPrices: Got it!")
 	return res
 }
