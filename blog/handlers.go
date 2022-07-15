@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/gofiber/fiber/v2"
 	blogStructs "github.com/yekta/banano-price-service/blog/structs"
@@ -17,13 +18,14 @@ var lastPostToMedium = ""
 var lastBlogIndex = ""
 
 func GhostToMediumHandler(c *fiber.Ctx) error {
+	start := time.Now()
 	key := c.Query("key")
 	if key != GHOST_TO_MEDIUM_SECRET {
 		log.Println("GhostToMediumHandler: Not authorized")
 		return c.Status(http.StatusUnauthorized).SendString("Not authorized")
 	}
 
-	log.Println("----- GhostToMediumHandler: Triggered...")
+	log.Println("-- GhostToMediumHandler: Triggered...")
 
 	var payload blogStructs.SGhostPostWebhook
 	if err := c.BodyParser(&payload); err != nil {
@@ -79,12 +81,13 @@ func GhostToMediumHandler(c *fiber.Ctx) error {
 	}
 
 	log.Printf(`GhostToMediumHandler: Submitted to Medium -> "%s"...`, post.Title)
-	log.Println("----- GhostToMediumHandler: Finished!")
+	log.Printf("-- GhostToMediumHandler: Finished in %s!", time.Since(start))
 
 	return c.JSON(r)
 }
 
 func BlogPostHandler(c *fiber.Ctx) error {
+	start := time.Now()
 	key := c.Query("key")
 	if key != GHOST_API_KEY {
 		log.Println("BlogPostHandler: Not authorized")
@@ -92,7 +95,7 @@ func BlogPostHandler(c *fiber.Ctx) error {
 	}
 
 	slug := c.Params("slug")
-	log.Printf(`----- BlogPostHandler: Triggered for "%s"...`, slug)
+	log.Printf(`-- BlogPostHandler: Triggered for "%s"...`, slug)
 	post, ok := blogSlugToPost[slug]
 
 	if !ok {
@@ -118,19 +121,20 @@ func BlogPostHandler(c *fiber.Ctx) error {
 		}
 	}
 
-	log.Printf(`----- BlogPostHandler: Finished for "%s"!`, slug)
+	log.Printf(`-- BlogPostHandler: Finished for "%s" in %s!`, slug, time.Since(start))
 
 	return c.JSON(post)
 }
 
 func BlogPostsHandler(c *fiber.Ctx) error {
+	start := time.Now()
 	key := c.Query("key")
 	if key != GHOST_API_KEY {
 		log.Println("BlogPostsHandler: Not authorized")
 		return c.Status(http.StatusUnauthorized).SendString("Not authorized")
 	}
 
-	log.Println("----- BlogPostsHandler: Triggered...")
+	log.Println("-- BlogPostsHandler: Triggered...")
 
 	var postsRes blogStructs.SGhostPostsResponse
 
@@ -191,19 +195,20 @@ func BlogPostsHandler(c *fiber.Ctx) error {
 		}
 	}
 
-	log.Println("----- BlogPostsHandler: Finished!")
+	log.Printf("-- BlogPostsHandler: Finished in %s!", time.Since(start))
 
 	return c.JSON(postsRes)
 }
 
 func IndexBlogHandler(c *fiber.Ctx) error {
+	start := time.Now()
 	key := c.Query("key")
 	if key != GHOST_TO_MEDIUM_SECRET {
 		log.Println("IndexBlogHandler: Not authorized")
 		return c.Status(http.StatusUnauthorized).SendString("Not authorized")
 	}
 
-	log.Println("----- IndexBlogHandler: Triggered...")
+	log.Println("-- IndexBlogHandler: Triggered...")
 
 	var payload blogStructs.SGhostPostWebhook
 	if err := c.BodyParser(&payload); err != nil {
@@ -218,7 +223,7 @@ func IndexBlogHandler(c *fiber.Ctx) error {
 
 	IndexBlog(false)
 
-	log.Println("----- IndexBlogHandler: Finished!")
+	log.Printf("-- IndexBlogHandler: Finished in %s!", time.Since(start))
 
 	return c.Status(http.StatusOK).SendString("OK")
 }

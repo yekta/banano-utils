@@ -11,16 +11,18 @@ import (
 )
 
 func IndexBlog(initial bool) {
-	log.Println("----- IndexBlog: Started Indexing...")
+	start := time.Now()
+	log.Println("-- IndexBlog: Started Indexing...")
 	GetAndSetBlogPosts()
 	if !initial {
 		TriggerDeploys()
 	}
 	IndexTypesense()
-	log.Println("----- IndexBlog: Finished Indexing!")
+	log.Printf("-- IndexBlog: Finished Indexing in %s!", time.Since(start))
 }
 
 func GetAndSetBlogPosts() error {
+	start := time.Now()
 	log.Println("GetAndSetBlogPosts: Getting...")
 
 	resp, err := http.Get(blogEndpoint)
@@ -62,11 +64,12 @@ func GetAndSetBlogPosts() error {
 		blogSlugToPost[newPost.Slug] = newPost
 	}
 
-	log.Println("GetAndSetBlogPosts: Set!")
+	log.Printf("GetAndSetBlogPosts: Set in %s!", time.Since(start))
 	return err
 }
 
 func IndexTypesense() error {
+	start := time.Now()
 	log.Println("TypesenseHandler: Started Indexing...")
 
 	var blogPostsForTypesense []interface{}
@@ -107,7 +110,7 @@ func IndexTypesense() error {
 		log.Printf("TypesenseHandler: Imported documents to Typesense...")
 	}
 
-	log.Println("TypesenseHandler: Finished Indexing...")
+	log.Printf("TypesenseHandler: Finished Indexing in %s!", time.Since(start))
 	return errImport
 }
 

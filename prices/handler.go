@@ -2,6 +2,7 @@ package prices
 
 import (
 	"log"
+	"time"
 
 	"github.com/gofiber/fiber/v2"
 	priceSources "github.com/yekta/banano-price-service/prices/sources"
@@ -11,15 +12,16 @@ import (
 var prices priceStructs.SPrices
 
 func PricesHandler(c *fiber.Ctx) error {
-	log.Println("----- PricesHandler: Triggered...")
+	log.Println("-- PricesHandler: Triggered...")
 	return c.JSON(prices)
 }
 
 func GetAndSetPrices() {
-	log.Println("----- GetAndSetPrices: Started...")
+	start := time.Now()
+	log.Println("-- GetAndSetPrices: Started...")
 	res := GetPrices()
 	prices = res
-	log.Println("----- GetAndSetPrices: Set!")
+	log.Printf("-- GetAndSetPrices: Set in %s!", time.Since(start))
 }
 
 func GetPrices() priceStructs.SPrices {
