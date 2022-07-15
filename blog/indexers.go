@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"sync"
 	"time"
 
 	blogStructs "github.com/yekta/banano-price-service/blog/structs"
@@ -12,12 +13,26 @@ import (
 
 func IndexBlog(initial bool) {
 	start := time.Now()
+
 	log.Println("-- IndexBlog: Started Indexing...")
+
 	GetAndSetBlogPosts()
+
+	var wg sync.WaitGroup
 	if !initial {
-		TriggerDeploys()
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			TriggerDeploys()
+		}()
 	}
-	IndexTypesense()
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		IndexTypesense()
+	}()
+	wg.Wait()
+
 	log.Printf("-- IndexBlog: Finished Indexing in %s!", time.Since(start))
 }
 
@@ -144,6 +159,6 @@ func TriggerDeploy(endpoint blogStructs.WebhookEndpoint) {
 	if err != nil {
 		log.Printf(`TriggerDeploy: Got error "%s"`, err)
 	} else {
-		log.Printf(`TriggerDeploy: Success for "%s"`, endpoint.Name)
+		log.Printf(`TriggerDeploy: Success for "%s"!`, endpoint.Name)
 	}
 }
