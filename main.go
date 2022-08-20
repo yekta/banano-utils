@@ -25,6 +25,7 @@ func main() {
 
 	go prices.GetAndSetPrices()
 	go blog.IndexBlog(true)
+	//
 
 	app.Get("/prices", prices.PricesHandler)
 	app.Get("/blog/posts", blog.BlogPostsHandler)
