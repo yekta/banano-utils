@@ -28,7 +28,6 @@ jobs:
         env:
           DOCKER_USERNAME: ${{ secrets.DOCKER_USER }}
           DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
-          DOCKER_REGISTRY_URL: ${{ secrets.DOCKER_REPO }}
 
       - name: Build and tag
         if: success()
