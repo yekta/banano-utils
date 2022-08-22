@@ -17,6 +17,8 @@ func PrettyPrint(v interface{}) (err error) {
 	return
 }
 
+//
+
 func GetEnv(key string) string {
 	err := godotenv.Load(".env")
 	if err != nil {
