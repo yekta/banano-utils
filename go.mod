@@ -10,9 +10,12 @@ require (
 )
 
 require (
+	github.com/PuerkitoBio/goquery v1.8.0
+	github.com/andybalholm/cascadia v1.3.1 // indirect
 	github.com/deepmap/oapi-codegen v1.9.0 // indirect
 	github.com/jinzhu/copier v0.3.5 // indirect
 	github.com/sony/gobreaker v0.5.0 // indirect
+	golang.org/x/net v0.0.0-20220225172249-27dd8689420f // indirect
 )
 
 require (

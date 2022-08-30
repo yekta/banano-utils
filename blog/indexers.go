@@ -5,9 +5,11 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"strings"
 	"sync"
 	"time"
 
+	"github.com/PuerkitoBio/goquery"
 	blogStructs "github.com/yekta/banano-price-service/blog/structs"
 )
 
@@ -50,7 +52,17 @@ func GetAndSetBlogPosts() error {
 
 	blogPosts = ghostPosts
 
-	for _, post := range blogPosts.Posts {
+	for index, post := range blogPosts.Posts {
+		// set feature image if post doesn't have one
+		if post.FeatureImage == "" {
+			doc, err := goquery.NewDocumentFromReader(strings.NewReader(post.Html))
+			if err != nil {
+				log.Fatal(err)
+			}
+			img := doc.Find("img").First()
+			post.FeatureImage = img.AttrOr("src", "")
+			blogPosts.Posts[index].FeatureImage = post.FeatureImage
+		}
 		newPost := post
 		newPost.Similars = []blogStructs.SGhostPost{}
 		if len(newPost.Tags) < 1 {
