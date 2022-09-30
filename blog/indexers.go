@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"sort"
 	"strings"
 	"sync"
 	"time"
@@ -68,26 +69,56 @@ func GetAndSetBlogPosts() error {
 		if len(newPost.Tags) < 1 {
 			continue
 		}
-		tagSlug := newPost.Tags[0].Slug
+		// get tagSlugs
+		var tagSlugs []string
+		for _, tag := range newPost.Tags {
+			tagSlugs = append(tagSlugs, tag.Slug)
+		}
+		similarsIdsToScore := make(map[string]int)
+		tagScoreConstant := 5
 		for _, otherPost := range blogPosts.Posts {
 			if otherPost.Slug == newPost.Slug || len(otherPost.Tags) < 1 {
 				continue
 			}
-			otherTagSlug := otherPost.Tags[0].Slug
-			if otherTagSlug == tagSlug {
-				newPost.Similars = append(newPost.Similars, blogStructs.SGhostPost{
-					Title:         otherPost.Title,
-					Slug:          otherPost.Slug,
-					FeatureImage:  otherPost.FeatureImage,
-					Excerpt:       otherPost.Excerpt,
-					CustomExcerpt: otherPost.CustomExcerpt,
-					ReadingTime:   otherPost.ReadingTime,
-				})
+			// get otherPost tagSlugs
+			var otherPostTagSlugs []string
+			for _, otherPostTag := range otherPost.Tags {
+				otherPostTagSlugs = append(otherPostTagSlugs, otherPostTag.Slug)
+			}
+			// count similar tags
+			similarTagsScore := 0
+			for tagSlugIndex, tagSlug := range tagSlugs {
+				for otherTagSlugIndex, otherPostTagSlug := range otherPostTagSlugs {
+					if tagSlug == otherPostTagSlug {
+						score := tagScoreConstant * (len(tagSlugs) - tagSlugIndex + len(otherPostTagSlugs) - otherTagSlugIndex)
+						similarTagsScore += score
+					}
+				}
+			}
+			similarsIdsToScore[otherPost.Id] = similarTagsScore
+		}
+		// sort similarsIdsToScore by score
+		sortedKeys := make([]string, 0, len(similarsIdsToScore))
+		for k := range similarsIdsToScore {
+			sortedKeys = append(sortedKeys, k)
+		}
+
+		sort.SliceStable(sortedKeys, func(i, j int) bool {
+			return similarsIdsToScore[sortedKeys[i]] > similarsIdsToScore[sortedKeys[j]]
+		})
+
+		for otherPostKey := range sortedKeys {
+			otherPostId := sortedKeys[otherPostKey]
+			for _, otherPost := range blogPosts.Posts {
+				if otherPost.Id == otherPostId {
+					newPost.Similars = append(newPost.Similars, otherPost)
+				}
 			}
 			if len(newPost.Similars) >= similarsLimit {
 				break
 			}
 		}
+
 		blogSlugToPost[newPost.Slug] = newPost
 	}
 
