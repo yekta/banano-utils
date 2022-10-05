@@ -18,7 +18,6 @@ func main() {
 	app := fiber.New()
 	cors := cors.New()
 	app.Use(cors)
-	//
 
 	cron := cron.New()
 	cron.AddFunc("@every 15s", prices.GetAndSetPrices)
