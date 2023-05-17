@@ -3,6 +3,8 @@ package blog
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
+	"io/ioutil"
 	"log"
 	"math"
 	"net/http"
@@ -69,15 +71,27 @@ func GhostToMediumHandler(c *fiber.Ctx) error {
 	req.Header.Add("Content-Type", "application/json")
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
-		log.Printf("Got error: %s", err)
+		log.Printf("GhostToMedium error: %s", err)
 		return c.Status(http.StatusInternalServerError).SendString("Something went wrong")
 	}
 	defer resp.Body.Close()
 
 	var anyResult map[string]interface{}
-	json.NewDecoder(resp.Body).Decode(&anyResult)
+	body, err := ioutil.ReadAll(resp.Body)
 
-	log.Print(anyResult)
+	if err != nil {
+		log.Printf("GhostToMedium error: %s", err)
+		return c.Status(http.StatusInternalServerError).SendString("Something went wrong")
+	}
+
+	err = json.Unmarshal(body, &anyResult)
+
+	if err != nil {
+		log.Printf("GhostToMedium error: %s", err)
+		return c.Status(http.StatusInternalServerError).SendString("Something went wrong")
+	}
+
+	fmt.Println(anyResult)
 
 	r := blogStructs.SBlogResponse{
 		Data: blogStructs.SBlogResponseData{
