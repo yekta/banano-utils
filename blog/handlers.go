@@ -43,7 +43,6 @@ func GhostToMediumHandler(c *fiber.Ctx) error {
 	post := payload.Post.Current
 
 	mediumPostEndpoint := "https://api.medium.com/v1/users/" + MEDIUM_USER_ID + "/posts"
-	fmt.Println("mediumPostEndpoint", mediumPostEndpoint)
 	var tags []string
 	for _, tag := range post.Tags {
 		tags = append(tags, tag.Name)
@@ -64,12 +63,13 @@ func GhostToMediumHandler(c *fiber.Ctx) error {
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	fmt.Println(mediumPostJson)
 	req, err := http.NewRequest("POST", mediumPostEndpoint, bytes.NewBuffer(mediumPostJson))
 	if err != nil {
 		log.Fatal(err)
 	}
 	req.Header.Add("Authorization", "Bearer "+MEDIUM_SECRET)
-	fmt.Println("mediumSecret", MEDIUM_SECRET)
 	req.Header.Add("Content-Type", "application/json")
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
