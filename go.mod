@@ -10,6 +10,13 @@ require (
 )
 
 require (
+	github.com/TylerBrock/colorjson v0.0.0-20200706003622-8a50f05110d2 // indirect
+	github.com/fatih/color v1.15.0 // indirect
+	github.com/mattn/go-colorable v0.1.13 // indirect
+	github.com/mattn/go-isatty v0.0.18 // indirect
+)
+
+require (
 	github.com/PuerkitoBio/goquery v1.8.0
 	github.com/andybalholm/cascadia v1.3.1 // indirect
 	github.com/deepmap/oapi-codegen v1.9.0 // indirect
@@ -25,5 +32,5 @@ require (
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/valyala/fasthttp v1.37.0 // indirect
 	github.com/valyala/tcplisten v1.0.0 // indirect
-	golang.org/x/sys v0.0.0-20220520151302-bc2c85ada10a // indirect
+	golang.org/x/sys v0.8.0 // indirect
 )

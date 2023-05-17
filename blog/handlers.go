@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"github.com/TylerBrock/colorjson"
 	"io/ioutil"
 	"log"
 	"math"
@@ -34,9 +35,6 @@ func GhostToMediumHandler(c *fiber.Ctx) error {
 		return err
 	}
 
-	fmt.Println("GhostToMediumHandler: Payload")
-	fmt.Println(payload)
-
 	if lastPostToMedium == payload.Post.Previous.Title+payload.Post.Previous.UpdatedAt {
 		log.Println("GhostToMediumHandler: Sent already, skipping")
 		return c.Status(http.StatusTooManyRequests).SendString("Sent already, skipping")
@@ -62,9 +60,6 @@ func GhostToMediumHandler(c *fiber.Ctx) error {
 		Tags:          tags,
 	}
 
-	fmt.Println("GhostToMediumHandler: Medium Post")
-	fmt.Println(mediumPost)
-
 	mediumPostJson, err := json.Marshal(mediumPost)
 	if err != nil {
 		log.Fatal(err)
@@ -74,6 +69,15 @@ func GhostToMediumHandler(c *fiber.Ctx) error {
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	fmt.Print("\n\n\n")
+	fmt.Printf("GhostToMediumHandler: Endpoint: %s\n", mediumPostEndpoint)
+	mp, _ := colorjson.Marshal(mediumPost)
+	fmt.Println(string(mp))
+	py, _ := colorjson.Marshal(payload)
+	fmt.Println(string(py))
+	fmt.Print("\n\n\n")
+
 	req.Header.Add("Authorization", "Bearer "+MEDIUM_SECRET)
 	req.Header.Add("Content-Type", "application/json")
 	req.Header.Add("Accept", "*/*")
