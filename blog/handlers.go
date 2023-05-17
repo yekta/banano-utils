@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/TylerBrock/colorjson"
 	"io/ioutil"
 	"log"
 	"math"
@@ -72,10 +71,8 @@ func GhostToMediumHandler(c *fiber.Ctx) error {
 
 	fmt.Print("\n\n\n")
 	fmt.Printf("GhostToMediumHandler: Endpoint: %s\n", mediumPostEndpoint)
-	mp, _ := colorjson.Marshal(mediumPost)
-	fmt.Println(string(mp))
-	py, _ := colorjson.Marshal(payload)
-	fmt.Println(string(py))
+	fmt.Printf("GhostToMediumHandler: Medium Post: %s\n", mediumPost)
+	fmt.Printf("GhostToMediumHandler: Payload: %s\n", payload)
 	fmt.Print("\n\n\n")
 
 	req.Header.Add("Authorization", "Bearer "+MEDIUM_SECRET)
