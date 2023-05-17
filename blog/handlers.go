@@ -49,15 +49,14 @@ func GhostToMediumHandler(c *fiber.Ctx) error {
 	}
 
 	content := GhostToMediumHtmlConverter(post.Html, post.Title)
-	fmt.Printf("GhostToMediumHandler: Content: %s\n", content)
 
 	mediumPost := blogStructs.SMediumPost{
-		Title:         "Title",
+		Title:         post.Title,
 		ContentFormat: "html",
-		Content:       "<h1>This is the test content asdfsadf</h1><p>etset</p>",
+		Content:       content,
 		PublishStatus: "draft",
-		CanonicalUrl:  "https://banano.cc/blog/",
-		Tags:          []string{},
+		CanonicalUrl:  "https://banano.cc/blog/" + post.Slug,
+		Tags:          tags,
 	}
 
 	mediumPostJson, err := json.Marshal(mediumPost)
