@@ -10,12 +10,16 @@ type SMediumPost struct {
 }
 
 type SBlogResponse struct {
-	Data  SBlogResponseData
-	Error SBlogResponseError
+	Data  SBlogResponseData  `json:"data"`
+	Error SBlogResponseError `json:"error"`
 }
 
 type SBlogResponseData struct {
-	Title string `json:"title"`
+	Title         string `json:"title"`
+	ID            string `json:"id"`
+	AuthorId      string `json:"author_id"`
+	URL           string `json:"url"`
+	PublishStatus string `json:"publish_status"`
 }
 type SBlogResponseError struct {
 	Message string `json:"message"`
