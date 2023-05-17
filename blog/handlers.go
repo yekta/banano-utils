@@ -80,6 +80,9 @@ func GhostToMediumHandler(c *fiber.Ctx) error {
 		},
 	}
 
+	log.Printf("-- GhostToMediumResponse --")
+	log.Print(r)
+
 	log.Printf(`GhostToMediumHandler: Submitted to Medium -> "%s"...`, post.Title)
 	log.Printf("-- GhostToMediumHandler: Finished in %s!", time.Since(start))
 
