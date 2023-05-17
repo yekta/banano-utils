@@ -59,12 +59,13 @@ func GhostToMediumHandler(c *fiber.Ctx) error {
 		Tags:          tags,
 	}
 
+	fmt.Println(mediumPost)
+
 	mediumPostJson, err := json.Marshal(mediumPost)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	fmt.Println(mediumPostJson)
 	req, err := http.NewRequest("POST", mediumPostEndpoint, bytes.NewBuffer(mediumPostJson))
 	if err != nil {
 		log.Fatal(err)
