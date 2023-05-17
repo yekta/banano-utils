@@ -76,7 +76,6 @@ func GhostToMediumHandler(c *fiber.Ctx) error {
 	}
 	defer resp.Body.Close()
 
-	var anyResult map[string]interface{}
 	body, err := ioutil.ReadAll(resp.Body)
 
 	if err != nil {
@@ -84,14 +83,7 @@ func GhostToMediumHandler(c *fiber.Ctx) error {
 		return c.Status(http.StatusInternalServerError).SendString("Something went wrong")
 	}
 
-	err = json.Unmarshal(body, &anyResult)
-
-	if err != nil {
-		log.Printf("GhostToMedium error: %s", err)
-		return c.Status(http.StatusInternalServerError).SendString("Something went wrong")
-	}
-
-	fmt.Println(anyResult)
+	fmt.Println(string(body))
 
 	r := blogStructs.SBlogResponse{
 		Data: blogStructs.SBlogResponseData{
