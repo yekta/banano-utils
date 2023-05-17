@@ -72,16 +72,18 @@ func GhostToMediumHandler(c *fiber.Ctx) error {
 		log.Printf("Got error: %s", err)
 		return c.Status(http.StatusInternalServerError).SendString("Something went wrong")
 	}
-	json.NewDecoder(resp.Body).Decode(&resp)
+	defer resp.Body.Close()
+
+	var anyResult map[string]interface{}
+	json.NewDecoder(resp.Body).Decode(&anyResult)
+
+	log.Print(anyResult)
 
 	r := blogStructs.SBlogResponse{
 		Data: blogStructs.SBlogResponseData{
 			Title: post.Title,
 		},
 	}
-
-	log.Printf("-- GhostToMediumResponse --")
-	log.Print(r)
 
 	log.Printf(`GhostToMediumHandler: Submitted to Medium -> "%s"...`, post.Title)
 	log.Printf("-- GhostToMediumHandler: Finished in %s!", time.Since(start))
