@@ -34,6 +34,9 @@ func GhostToMediumHandler(c *fiber.Ctx) error {
 		return err
 	}
 
+	fmt.Println("GhostToMediumHandler: Payload")
+	fmt.Println(payload)
+
 	if lastPostToMedium == payload.Post.Previous.Title+payload.Post.Previous.UpdatedAt {
 		log.Println("GhostToMediumHandler: Sent already, skipping")
 		return c.Status(http.StatusTooManyRequests).SendString("Sent already, skipping")
@@ -59,6 +62,7 @@ func GhostToMediumHandler(c *fiber.Ctx) error {
 		Tags:          tags,
 	}
 
+	fmt.Println("GhostToMediumHandler: Medium Post")
 	fmt.Println(mediumPost)
 
 	mediumPostJson, err := json.Marshal(mediumPost)
