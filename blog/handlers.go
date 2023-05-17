@@ -76,6 +76,8 @@ func GhostToMediumHandler(c *fiber.Ctx) error {
 	}
 	req.Header.Add("Authorization", "Bearer "+MEDIUM_SECRET)
 	req.Header.Add("Content-Type", "application/json")
+	req.Header.Add("Accept", "*/*")
+	req.Header.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/42.0.2311.135 Safari/537.36 Edge/12.246")
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
 		log.Printf("GhostToMedium error: %s", err)
