@@ -12,8 +12,8 @@ import (
 
 func GetCoinex() priceStructs.SPriceSet {
 	coinexTickerURL := "https://api.coinex.com/v1/market/ticker"
-	coinexBanBtcURL := fmt.Sprintf("%s%s", coinexTickerURL, "?market=BANBTC")
-	coinexBanUsdtURL := fmt.Sprintf("%s%s", coinexTickerURL, "?market=BANUSDT")
+	coinexBanBtcURL := fmt.Sprintf("%s%s", coinexTickerURL, "?market=BANANOBTC")
+	coinexBanUsdtURL := fmt.Sprintf("%s%s", coinexTickerURL, "?market=BANANOUSDT")
 
 	respCoinexBtc, errCoinexBtc := http.Get(coinexBanBtcURL)
 	if errCoinexBtc != nil {

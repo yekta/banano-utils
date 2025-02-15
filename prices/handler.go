@@ -25,7 +25,7 @@ func GetAndSetPrices() {
 }
 
 func GetPrices() priceStructs.SPrices {
-	log.Println("GetPrices: Getting...")
+	log.Println("GetPrices: Getting prices...")
 
 	var res priceStructs.SPrices
 
