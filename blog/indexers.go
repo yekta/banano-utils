@@ -12,7 +12,12 @@ import (
 
 	"github.com/PuerkitoBio/goquery"
 	blogStructs "github.com/yekta/banano-price-service/blog/structs"
+	sharedUtils "github.com/yekta/banano-price-service/shared"
 )
+
+var CLOUDFLARE_PAGES_WEBHOOK = sharedUtils.GetEnv("CLOUDFLARE_PAGES_WEBHOOK")
+var VERCEL_WEBHOOK = sharedUtils.GetEnv("VERCEL_WEBHOOK")
+var NETLIFY_WEBHOOK = sharedUtils.GetEnv("NETLIFY_WEBHOOK")
 
 func IndexBlog(initial bool) {
 	start := time.Now()
@@ -177,15 +182,15 @@ func TriggerDeploys() {
 	endpoints := []blogStructs.WebhookEndpoint{
 		{
 			Name: "Cloudflare Pages",
-			Url:  "https://api.cloudflare.com/client/v4/pages/webhooks/deploy_hooks/7fb014e8-6f1a-420f-89a7-919693ac5337",
+			Url:  CLOUDFLARE_PAGES_WEBHOOK,
 		},
 		{
 			Name: "Vercel",
-			Url:  "https://api.vercel.com/v1/integrations/deploy/prj_cR1PYJ509eWSNjFaV58m3UxODzWX/nXlojEcSZu",
+			Url:  VERCEL_WEBHOOK,
 		},
 		{
 			Name: "Netlify",
-			Url:  "https://api.netlify.com/build_hooks/62caf49d858ea74e4d4dc3de",
+			Url:  NETLIFY_WEBHOOK,
 		},
 	}
 
